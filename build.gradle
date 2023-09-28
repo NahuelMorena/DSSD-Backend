@@ -20,6 +20,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// https://mvnrepository.com/artifact/org.bonitasoft.engine/bonita-common
+	implementation group: 'org.bonitasoft.engine', name: 'bonita-common', version: '8.0.0'
+	// https://mvnrepository.com/artifact/org.bonitasoft.engine/bonita-client
+	implementation 'org.bonitasoft.engine:bonita-client:8.0.0'
+	
+	
+	
+	
+	
+
 }
 
 tasks.named('test') {
