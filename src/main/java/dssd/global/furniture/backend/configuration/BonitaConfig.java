@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 public class BonitaConfig {
 	@Bean
     public void bonitaAPISession() throws Exception {
+		/**
 		// Let's set the connection settings to use HTTP on the already running Bonita runtime:
     	Map<String, String> settings = new HashMap<String, String>();
     	settings.put("server.url", "http://localhost:60000");
@@ -32,6 +33,7 @@ public class BonitaConfig {
     	org.bonitasoft.engine.api.APIClient apiClient = new APIClient();
     	
 		apiClient.login("install", "install"); // use "install" / "install" if you don't have any other user created
+   		**/
     }
 
    
