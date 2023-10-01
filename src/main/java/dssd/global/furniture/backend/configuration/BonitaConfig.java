@@ -35,7 +35,8 @@ public class BonitaConfig {
     	org.bonitasoft.engine.api.APIClient apiClient = new APIClient();
     	
 		apiClient.login("walter.bates", "bpm"); // use "install" / "install" if you don't have any other user created
-		return apiClient;
+    	
+    	return apiClient;
 	}
 
 	@Bean

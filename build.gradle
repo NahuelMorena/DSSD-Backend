@@ -24,6 +24,8 @@ dependencies {
 	implementation group: 'org.bonitasoft.engine', name: 'bonita-common', version: '8.0.0'
 	// https://mvnrepository.com/artifact/org.bonitasoft.engine/bonita-client
 	implementation 'org.bonitasoft.engine:bonita-client:8.0.0'
+	// https://mvnrepository.com/artifact/org.bonitasoft.connectors/bonita-connectors
+	implementation 'org.bonitasoft.connectors:bonita-connectors:1.0.0'
 	
 	
 	

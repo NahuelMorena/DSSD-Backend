@@ -23,7 +23,7 @@ import dssd.global.furniture.backend.services.BonitaService;
 
 @Configuration
 
-public class ApplicationStartConfiguration implements ApplicationRunner {
+public class ApplicationStartExecutions implements ApplicationRunner {
 	@Autowired
 	BonitaService bonitaService;
 
@@ -39,15 +39,11 @@ public class ApplicationStartConfiguration implements ApplicationRunner {
 		System.out.println("ID usuario:" + user.getId() + " PRIMER NOMBRE:" +user.getFirstName() + " APELLIDO: " + user.getLastName());
 		
 		System.out.println("LISTA DE PROCESOS DEPLOYADOS:" +
-		this.bonitaService.getLast100DeployedProcess().getResult().toString());
-		
-		ProcessDefinition processDefinition = processAPI.getProcessDefinition(this.bonitaService.getLast100DeployedProcess().getResult().get(0).getId());
-		System.out.println("A new process was created: " + processDefinition.getName());
-		//enable process
-		processAPI.enableProcess(processDefinition.getId());
-		System.out.println("A new process was enabled: " + processDefinition.getId());
-		//processAPI.enableProcess(processDefinition.getId());
-		System.out.println("A new process was enabled: " + processDefinition.getId());
+		this.bonitaService.getLast100DeployedProcess().getResult().toString() + " SIZE: " +this.bonitaService.getLast100DeployedProcess().getCount() );
+
+		ProcessDefinition processDefinition = processAPI.getProcessDefinition(processAPI.getProcessDefinitionId("Pool", "1.0"));
+		System.out.println("ID DEL PROCESO: " + processDefinition.getId() + " NOMBRE DEL PROCESO" + processDefinition.getName());
+	
 		//start the process
 		final ProcessInstance processInstance = processAPI.startProcess(processDefinition.getId());
 		
