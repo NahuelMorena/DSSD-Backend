@@ -9,6 +9,9 @@ import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
+import org.bonitasoft.engine.bpm.process.ProcessActivationException;
+import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
+import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.platform.LoginException;
 import org.bonitasoft.engine.util.APITypeManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +39,14 @@ public class BonitaController {
 	@GetMapping("/api/bonita/startCase")
 	public ResponseEntity<?> startCase(){
 		
-		this.
-		return ResponseEntity.ok(new MessageDTO("Caso creado"));
+		try {
+			this.bonitaService.startCase();
+		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			ResponseEntity.badRequest().body(new MessageDTO("Caso creado"));
+		}
+;		return ResponseEntity.ok(new MessageDTO("Caso creado"));
 		
 	}
 	

@@ -116,7 +116,7 @@ public class BonitaService {
 		
 	}
 	
-	public void startProcess() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
+	public void startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
 		 
 		ProcessDefinition processDefinition = this.getProcessDefinition(
 				this.getProcessDefinitionId​("Proceso de planificación de colección de muebles", "2.0"));
