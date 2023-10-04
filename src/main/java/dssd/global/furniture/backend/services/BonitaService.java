@@ -116,8 +116,15 @@ public class BonitaService {
 		
 	}
 	
-	public void startProcess(ProcessDefinition processDefinition) throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
-	    ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
+	public void startProcess() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
+		 
+		ProcessDefinition processDefinition = this.getProcessDefinition(
+				this.getProcessDefinitionId​("Proceso de planificación de colección de muebles", "2.0"));
+		System.out.println(
+				"ID DEL PROCESO: " + processDefinition.getId() + " NOMBRE DEL PROCESO" + processDefinition.getName());
+
+		//start the process. Tras hacer esto en el localhost de bonita en la pestaña de "cases" deberia aparecer uno nuevo.
+		final ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
 	    System.out.println("A new process instance was started with id: " + processInstance.getId());
 	}
 	
@@ -220,16 +227,15 @@ public class BonitaService {
 	        e.printStackTrace();
 	    }
 	}
+	
 
 	public void executeTask(long userId, long taskInstanceId) throws UserTaskNotFoundException, FlowNodeExecutionException, ContractViolationException{
 		//No hace nada aun
 		String s =this.getProcessAPI()
-		(
-				this
-				.getProcessDefinitionId​(
-					Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO), 
-					0, 
-					12
+				.getActivities(
+						this.getProcessDefinitionId​(Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO), 
+						0, 
+						12
 				)
 		.toString();
 		System.out.println("Lista: " + s);
