@@ -10,6 +10,10 @@ import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
+import org.bonitasoft.engine.bpm.contract.ContractViolationException;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
+import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
+import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinition;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
@@ -38,6 +42,8 @@ import org.bonitasoft.engine.session.APISession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
+
+import dssd.global.furniture.backend.utils.Constantes;
 
 
 
@@ -213,5 +219,22 @@ public class BonitaService {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	}
+
+	public void executeTask(long userId, long taskInstanceId) throws UserTaskNotFoundException, FlowNodeExecutionException, ContractViolationException{
+		//No hace nada aun
+		String s =this.getProcessAPI()
+		(
+				this
+				.getProcessDefinitionId​(
+					Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO), 
+					0, 
+					12
+				)
+		.toString();
+		System.out.println("Lista: " + s);
+		
+		//apiClient.getProcessAPI().assignAndExecuteUserTask(userId, getProcess, null);
+		//this.getProcessAPI().executeUserTask(userId, taskInstanceId, null);
 	}
 }

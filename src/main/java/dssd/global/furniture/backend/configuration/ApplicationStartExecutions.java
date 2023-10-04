@@ -3,6 +3,7 @@ package dssd.global.furniture.backend.configuration;
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
+import org.bonitasoft.engine.bpm.flownode.TaskInstance;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinition;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
@@ -42,13 +43,16 @@ public class ApplicationStartExecutions implements ApplicationRunner {
 		this.bonitaService.getLast100DeployedProcess().getResult().toString() + " SIZE: " +this.bonitaService.getLast100DeployedProcess().getCount() );
 		
 		//Conseguir el proceso Pool que he creado en mi bonita
-		ProcessDefinition processDefinition = processAPI.getProcessDefinition(processAPI.getProcessDefinitionId("Pool", "1.0"));
+		ProcessDefinition processDefinition = processAPI.getProcessDefinition(
+			processAPI.getProcessDefinitionId("Proceso de planificación de colección de muebles", "2.0"));
 		System.out.println("ID DEL PROCESO: " + processDefinition.getId() + " NOMBRE DEL PROCESO" + processDefinition.getName());
 	
 		//start the process. Tras hacer esto en el localhost de bonita en la pestaña de "cases" deberia aparecer uno nuevo.
 		final ProcessInstance processInstance = processAPI.startProcess(processDefinition.getId());
-		processAPI.assignUserTask(taskToExecute.getId(), apiSession.getUserId());
 		
+		/*TaskInstance taskToExecute = processAPI.tasks
+		processAPI.assignUserTask(taskToExecute.getId(), apiSession.getUserId());
+		*/
 	}
 	
 
