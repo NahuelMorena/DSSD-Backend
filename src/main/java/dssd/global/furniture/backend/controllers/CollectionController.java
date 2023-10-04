@@ -5,8 +5,12 @@ import dssd.global.furniture.backend.model.Category;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.Furniture;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
+import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
+import org.bonitasoft.engine.bpm.process.ProcessActivationException;
+import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
+import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +31,8 @@ public class CollectionController {
 	
 	@Autowired
 	private CollectionService collectionService;
+	@Autowired
+	private BonitaService bonitaService;
 	
 	
     private final String baseUrl = "/api/collections";
@@ -74,6 +80,13 @@ public class CollectionController {
     public ResponseEntity<Collection> createCollection(@RequestBody CollectionDTO request) {
     	Collection newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
     			request.getEstimated_release_date(), request.getFurnitures());
+    	try {
+			this.bonitaService.startCase();
+		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
     	return ResponseEntity.ok(newCollection);
     	
     }
