@@ -41,6 +41,15 @@ public class Furniture {
 		this.description = description;
 		this.category = category;
 	}
+    
+    
+
+	public Furniture(String model_name, String description, Category category) {
+		super();
+		this.model_name = model_name;
+		this.description = description;
+		this.category = category;
+	}
 
 	public String getModel_name() {
         return model_name;

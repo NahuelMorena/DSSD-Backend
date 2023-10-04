@@ -33,8 +33,16 @@ public class Collection {
         this.estimated_release_date = estimated_release_date;
         this.furnitures = furnitures;
     }
+    
+    
 
-    public Set<FurnitureInCollection> getFurnitures() {
+	public Collection(LocalDate date_start_manufacture,LocalDate date_end_manufacture, LocalDate estimated_release_date) {
+		this.date_start_manufacture = date_start_manufacture;
+		this.date_end_manufacture = date_end_manufacture;
+		this.estimated_release_date = estimated_release_date;
+	}
+
+	public Set<FurnitureInCollection> getFurnitures() {
         return furnitures;
     }
 
