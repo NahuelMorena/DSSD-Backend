@@ -32,12 +32,40 @@ public class Furniture {
         this.collections = collection;
         this.category = category;
     }
+    
 
-    public String getModel_name() {
+    public Furniture(Long id, String model_name, String description, Category category) {
+		super();
+		this.id = id;
+		this.model_name = model_name;
+		this.description = description;
+		this.category = category;
+	}
+    
+    
+
+	public Furniture(String model_name, String description, Category category) {
+		super();
+		this.model_name = model_name;
+		this.description = description;
+		this.category = category;
+	}
+
+	public String getModel_name() {
         return model_name;
     }
+	
+	
 
-    public void setModel_name(String model_name) {
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setModel_name(String model_name) {
         this.model_name = model_name;
     }
 
