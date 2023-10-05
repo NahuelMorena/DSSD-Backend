@@ -53,7 +53,9 @@ public class CollectionController {
     			return ResponseEntity.badRequest().build();	
     			}
     	try {
-			this.bonitaService.startCase();
+			Long caseId=this.bonitaService.startCase();
+			this.bonitaService.assignTaskToUser(caseId,newCollection.getDate_start_manufacture(),newCollection.getDate_end_manufacture(),
+					newCollection.getEstimated_release_date());
 		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

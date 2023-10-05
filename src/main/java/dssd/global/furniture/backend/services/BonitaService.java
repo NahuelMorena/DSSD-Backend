@@ -1,7 +1,10 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -121,7 +124,8 @@ public class BonitaService {
 	}
 	
 	
-	public void assignTaskToUser(Long processInstanceId) {
+	public void assignTaskToUser(Long processInstanceId,LocalDate date_start_manufacture,LocalDate date_end_manufacture,
+			LocalDate estimated_release_date) {
 		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 30, null);
 		HumanTaskInstance ultimaTareaPendienteCasoActual=null;
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
@@ -136,7 +140,7 @@ public class BonitaService {
 				this.getProcessAPI().assignUserTask(ultimaTareaPendienteCasoActual.getId(),this.getCurrentLoggedInUser().getId());
 				try {
 					 Map<String, Serializable> taskVariables = new HashMap<>();
-					 taskVariables.put("llegada_materiales", true);
+					 taskVariables.put("inicio_fabricación", Date.from(date_start_manufacture.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 					this.getProcessAPI().updateActivityInstanceVariables(ultimaTareaPendienteCasoActual.getId(),taskVariables);
 					this.getProcessAPI().executeUserTask(ultimaTareaPendienteCasoActual.getId(),null);
 				} catch (UserTaskNotFoundException | FlowNodeExecutionException | ContractViolationException e) {
@@ -150,7 +154,7 @@ public class BonitaService {
 
 
 	
-	public void startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
+	public Long startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
 		 
 		ProcessDefinition processDefinition = this.getProcessDefinition(
 				this.getProcessDefinitionId​("Proceso de planificación de colección de muebles", "2.0"));
@@ -160,7 +164,7 @@ public class BonitaService {
 		//start the process. Tras hacer esto en el localhost de bonita en la pestaña de "cases" deberia aparecer uno nuevo.
 		final ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
 	    System.out.println("A new process instance was started with id: " + processInstance.getId());
-	    this.assignTaskToUser(processInstance.getId());
+	    return processInstance.getId();
 	}
 	
 	public SearchResult<ProcessDeploymentInfo> getLast100DeployedProcess() throws SearchException {
