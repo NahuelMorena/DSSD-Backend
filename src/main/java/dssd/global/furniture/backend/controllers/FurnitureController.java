@@ -1,6 +1,5 @@
 package dssd.global.furniture.backend.controllers;
 
-import dssd.global.furniture.backend.model.Category;
 import dssd.global.furniture.backend.model.Furniture;
 import dssd.global.furniture.backend.services.interfaces.FurnitureService;
 

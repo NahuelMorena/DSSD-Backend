@@ -1,4 +1,4 @@
-package dssd.global.furniture.backend.dtos;
+package dssd.global.furniture.backend.controllers.dtos;
 
 import java.time.LocalDate;
 import java.util.List;

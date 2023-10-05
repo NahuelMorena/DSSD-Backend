@@ -1,11 +1,12 @@
 package dssd.global.furniture.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.Set;
 
 @Entity
+@JsonIgnoreProperties({"furnitureCollection"})
 @Table(name="furnitures")
 public class Furniture {
 

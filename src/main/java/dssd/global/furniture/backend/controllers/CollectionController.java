@@ -1,6 +1,6 @@
 package dssd.global.furniture.backend.controllers;
 
-import dssd.global.furniture.backend.dtos.CollectionDTO;
+import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
 import dssd.global.furniture.backend.model.Category;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.Furniture;
@@ -39,47 +39,19 @@ public class CollectionController {
 
     @GetMapping(baseUrl + "/get-collections")
     public HttpEntity<List<Collection>> getCollections(){
-        //Se crea una collección y se envia en una lista para
-        //demostrar que funciona el endpoint
-
-        //Creo manualmente dos mueble
-        Furniture newFurniture = new Furniture();
-        newFurniture.setModel_name("Sofa de cuero");
-        newFurniture.setDescription("Un cómodo sofá de cuero");
-        newFurniture.setCategory(Category.SOFA);
-
-        Furniture newFurniture2 = new Furniture();
-        newFurniture2.setModel_name("Silla de madera");
-        newFurniture2.setDescription("Una cómoda silla de madera");
-        newFurniture2.setCategory(Category.SILLA);
-
-        //Creo manualmente una collección
-        Collection newCollection = new Collection();
-        newCollection.setDate_end_manufacture(LocalDate.of(2023, 12, 15));
-        newCollection.setDate_start_manufacture(LocalDate.of(2023, 12, 15));
-        newCollection.setEstimated_release_date(LocalDate.of(2023, 12, 15));
-
-        //Creo la relación entre colección y mueble
-        FurnitureInCollection fc = new FurnitureInCollection(newCollection, newFurniture);
-        Set<FurnitureInCollection> fcList = new HashSet<>();
-        fcList.add(fc);
-        newCollection.setFurnitures(fcList);
-
-        FurnitureInCollection fc2 = new FurnitureInCollection(newCollection, newFurniture2);
-        newCollection.getFurnitures().add(fc2);
-
-        //Creo la lista de collecciones a enviar
-        List<Collection> collectionList = new ArrayList<>();
-        collectionList.add(newCollection);
-
-        return ResponseEntity.ok(collectionList);
+       return ResponseEntity.ok(this.collectionService.getAllCollections());
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @PostMapping(baseUrl + "/create-collection")
     public ResponseEntity<Collection> createCollection(@RequestBody CollectionDTO request) {
-    	Collection newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
+    	Collection newCollection=null;
+    	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null && request.getEstimated_release_date()!=null){
+    			newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
     			request.getEstimated_release_date(), request.getFurnitures());
+    	}else {
+    			return ResponseEntity.badRequest().build();	
+    			}
     	try {
 			this.bonitaService.startCase();
 		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {

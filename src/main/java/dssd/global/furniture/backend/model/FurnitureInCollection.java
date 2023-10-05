@@ -1,5 +1,7 @@
 package dssd.global.furniture.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -16,6 +18,7 @@ public class FurnitureInCollection {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_furniture")
+    @JsonBackReference
     private Furniture furniture;
 
     public FurnitureInCollection() {}

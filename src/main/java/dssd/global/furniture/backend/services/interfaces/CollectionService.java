@@ -14,5 +14,6 @@ import dssd.global.furniture.backend.model.Furniture;
 public interface CollectionService {
 	public Collection createCollection(LocalDate date_start_manufacture, LocalDate date_end_manufacture,
 			LocalDate estimated_release_date,List<Furniture> furnitures);
+	public List<Collection> getAllCollections();
 
 }

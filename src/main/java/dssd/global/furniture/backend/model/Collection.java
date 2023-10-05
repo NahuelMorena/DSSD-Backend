@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name="collections")
 public class Collection {
@@ -16,6 +20,7 @@ public class Collection {
     private Long id;
 
     @OneToMany(mappedBy = "collection")
+    @JsonManagedReference
     private Set<FurnitureInCollection> furnitures;
 
     private LocalDate date_start_manufacture;

@@ -36,4 +36,9 @@ public class CollectionServiceImplementation implements CollectionService {
     	}
 		return savedCollection;
 	}
+	
+	@Transactional
+	public List<Collection> getAllCollections(){
+		return (List<Collection>)collectionRepository.findAll();
+	}
 }
