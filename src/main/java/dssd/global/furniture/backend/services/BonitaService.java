@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
@@ -12,7 +13,9 @@ import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
 import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstanceCriterion;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
+import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinition;
@@ -22,7 +25,9 @@ import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessEnablementException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.bpm.process.ProcessInstance;
+import org.bonitasoft.engine.bpm.process.ProcessInstanceSearchDescriptor;
 import org.bonitasoft.engine.exception.SearchException;
+import org.bonitasoft.engine.exception.UpdateException;
 import org.bonitasoft.engine.expression.Expression;
 import org.bonitasoft.engine.expression.ExpressionBuilder;
 import org.bonitasoft.engine.expression.ExpressionType;
@@ -93,7 +98,6 @@ public class BonitaService {
 		try {
 			return this.getProcessAPI().getProcessDefinition(id);
 		} catch (ProcessDefinitionNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("NO SE ENCONTRO LA DEFINICION DEL PROCESO POR ID");
 			return null;
@@ -116,6 +120,36 @@ public class BonitaService {
 		
 	}
 	
+	
+	public void assignTaskToUser(Long processInstanceId) {
+		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 30, null);
+		HumanTaskInstance ultimaTareaPendienteCasoActual=null;
+		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
+	        HumanTaskInstance item = i.next();
+			if(processInstanceId.equals(item.getParentProcessInstanceId())) {
+				ultimaTareaPendienteCasoActual=item;
+				break;
+			}
+		}
+		if(ultimaTareaPendienteCasoActual!=null) {
+			try {
+				this.getProcessAPI().assignUserTask(ultimaTareaPendienteCasoActual.getId(),this.getCurrentLoggedInUser().getId());
+				try {
+					 Map<String, Serializable> taskVariables = new HashMap<>();
+					 taskVariables.put("llegada_materiales", true);
+					this.getProcessAPI().updateActivityInstanceVariables(ultimaTareaPendienteCasoActual.getId(),taskVariables);
+					this.getProcessAPI().executeUserTask(ultimaTareaPendienteCasoActual.getId(),null);
+				} catch (UserTaskNotFoundException | FlowNodeExecutionException | ContractViolationException e) {
+					e.printStackTrace();
+				}
+			} catch (UpdateException e) {
+				e.printStackTrace();
+			}
+		}
+	    }
+
+
+	
 	public void startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
 		 
 		ProcessDefinition processDefinition = this.getProcessDefinition(
@@ -126,6 +160,7 @@ public class BonitaService {
 		//start the process. Tras hacer esto en el localhost de bonita en la pestaña de "cases" deberia aparecer uno nuevo.
 		final ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
 	    System.out.println("A new process instance was started with id: " + processInstance.getId());
+	    this.assignTaskToUser(processInstance.getId());
 	}
 	
 	public SearchResult<ProcessDeploymentInfo> getLast100DeployedProcess() throws SearchException {
