@@ -3,12 +3,9 @@ package dssd.global.furniture.backend.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -27,7 +24,7 @@ public class Collection {
 
     private LocalDate date_end_manufacture;
 
-    private LocalDate  estimated_release_date;
+    private LocalDate estimated_release_date;
 
     public Collection(){}
 
@@ -55,6 +52,9 @@ public class Collection {
         this.furnitures = furnitures;
     }
 
+    public Long getID() {
+        return id;
+    }
     public LocalDate getDate_start_manufacture() {
         return date_start_manufacture;
     }

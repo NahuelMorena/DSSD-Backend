@@ -1,9 +1,7 @@
 package dssd.global.furniture.backend.services;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +25,7 @@ public class CollectionServiceImplementation implements CollectionService {
 	
 	@Transactional
 	public Collection createCollection(LocalDate date_start_manufacture, LocalDate date_end_manufacture,
-			LocalDate estimated_release_date,List<Furniture> furnitures) {
+									   LocalDate estimated_release_date, List<Furniture> furnitures) {
 		Collection collection=new Collection(date_start_manufacture,date_end_manufacture,estimated_release_date);
 		Collection savedCollection = collectionRepository.save(collection);
 		for(Furniture furniture: furnitures) {

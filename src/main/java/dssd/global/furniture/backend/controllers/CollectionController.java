@@ -1,10 +1,7 @@
 package dssd.global.furniture.backend.controllers;
 
 import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
-import dssd.global.furniture.backend.model.Category;
 import dssd.global.furniture.backend.model.Collection;
-import dssd.global.furniture.backend.model.Furniture;
-import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
@@ -20,12 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 @Controller
 public class CollectionController {
 	
@@ -33,8 +25,7 @@ public class CollectionController {
 	private CollectionService collectionService;
 	@Autowired
 	private BonitaService bonitaService;
-	
-	
+
     private final String baseUrl = "/api/collections";
 
     @GetMapping(baseUrl + "/get-collections")
@@ -54,8 +45,7 @@ public class CollectionController {
     			}
     	try {
 			Long caseId=this.bonitaService.startCase();
-			this.bonitaService.assignTaskToUser(caseId,newCollection.getDate_start_manufacture(),newCollection.getDate_end_manufacture(),
-					newCollection.getEstimated_release_date());
+			this.bonitaService.assignTaskToUser(caseId, newCollection);
 		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
