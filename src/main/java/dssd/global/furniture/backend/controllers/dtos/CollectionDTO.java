@@ -6,6 +6,8 @@ import java.util.List;
 import dssd.global.furniture.backend.model.Furniture;
 
 public class CollectionDTO {
+
+	private Long id;
 	private LocalDate date_start_manufacture;
 
     private LocalDate date_end_manufacture;
@@ -46,5 +48,7 @@ public class CollectionDTO {
 		this.furnitures = furnitures;
 	}
     
-    
+    public Long getId() { return id;}
+
+	public void setId(Long id){ this.id = id;}
 }

@@ -55,8 +55,6 @@ public class Furniture {
 	public String getModel_name() {
         return model_name;
     }
-	
-	
 
     public Long getId() {
 		return id;

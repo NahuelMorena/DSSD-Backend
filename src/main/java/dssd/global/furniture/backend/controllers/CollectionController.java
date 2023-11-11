@@ -2,6 +2,7 @@ package dssd.global.furniture.backend.controllers;
 
 import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
 import dssd.global.furniture.backend.model.Collection;
+import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Controller
 public class CollectionController {
 	
@@ -29,8 +32,10 @@ public class CollectionController {
     private final String baseUrl = "/api/collections";
 
     @GetMapping(baseUrl + "/get-collections")
-    public HttpEntity<List<Collection>> getCollections(){
-       return ResponseEntity.ok(this.collectionService.getAllCollections());
+    public HttpEntity<List<CollectionDTO>> getCollections(){
+		List<Collection> collections = this.collectionService.getAllCollections();
+		List<CollectionDTO> collectionDTOs = this.convertToDTOs(collections);
+        return ResponseEntity.ok(collectionDTOs);
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
@@ -54,4 +59,23 @@ public class CollectionController {
     	return ResponseEntity.ok(newCollection);
     	
     }
+
+	/**
+	 *
+	 * METODOS PRIVADOS
+	 *
+	 */
+
+	private List<CollectionDTO> convertToDTOs(List<Collection> collections){
+		return collections.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
+	private CollectionDTO convertToDTO(Collection collection) {
+		CollectionDTO dto = new CollectionDTO();
+		dto.setId(collection.getID());
+		dto.setDate_start_manufacture(collection.getDate_start_manufacture());
+		dto.setDate_end_manufacture(collection.getDate_end_manufacture());
+		dto.setEstimated_release_date(collection.getEstimated_release_date());
+		dto.setFurnitures(collection.getFurnitures().stream().map(FurnitureInCollection::getFurniture).collect(Collectors.toList()));
+		return dto;
+	}
 }

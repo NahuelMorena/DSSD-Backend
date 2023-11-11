@@ -1,5 +1,7 @@
 package dssd.global.furniture.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,11 +18,12 @@ public class Collection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @OneToMany(mappedBy = "collection")
-    @JsonManagedReference
     private Set<FurnitureInCollection> furnitures;
 
     @OneToMany(mappedBy = "collection")
+    @JsonManagedReference
     private Set<MaterialInCollection> materials;
 
     private LocalDate date_start_manufacture;
@@ -80,6 +83,14 @@ public class Collection {
 
     public void setEstimated_release_date(LocalDate estimated_release_date) {
         this.estimated_release_date = estimated_release_date;
+    }
+
+    public Set<MaterialInCollection> getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(Set<MaterialInCollection> materials) {
+        this.materials = materials;
     }
 
     @Override
