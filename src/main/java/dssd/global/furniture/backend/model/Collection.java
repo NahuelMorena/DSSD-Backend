@@ -20,6 +20,9 @@ public class Collection {
     @JsonManagedReference
     private Set<FurnitureInCollection> furnitures;
 
+    @OneToMany(mappedBy = "collection")
+    private Set<MaterialInCollection> materials;
+
     private LocalDate date_start_manufacture;
 
     private LocalDate date_end_manufacture;
