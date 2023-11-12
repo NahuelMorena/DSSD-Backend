@@ -1,6 +1,8 @@
 package dssd.global.furniture.backend.controllers;
 
 import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
+import dssd.global.furniture.backend.controllers.dtos.MaterialRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
@@ -59,6 +61,17 @@ public class CollectionController {
     	return ResponseEntity.ok(newCollection);
     	
     }
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/search-material-offers")
+	public ResponseEntity<List<OffertsByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
+		System.out.println("entro a este endpoint");
+		System.out.println(request.getCollection_id());
+		System.out.println(request.getMaterials().get(0).getName());
+		System.out.println(request.getMaterials().get(0).getQuantity());
+		System.out.println("--------------");
+		return null;
+	}
 
 	/**
 	 *
