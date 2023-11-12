@@ -2,6 +2,7 @@ package dssd.global.furniture.backend.services;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,10 @@ public class CollectionServiceImplementation implements CollectionService {
 	@Transactional
 	public List<Collection> getAllCollections(){
 		return (List<Collection>)collectionRepository.findAll();
+	}
+
+	@Transactional
+	public Optional<Collection> getCollectionByID(Long id) {
+		return this.collectionRepository.findById(id);
 	}
 }

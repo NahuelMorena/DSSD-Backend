@@ -4,8 +4,8 @@ import java.util.List;
 
 public class MaterialRequestDTO {
     private Long collection_id;
-    private List<MaterialAPI> materials;
-    public static class MaterialAPI {
+    private List<MaterialRequest> materials;
+    public static class MaterialRequest {
         private String name;
         private Integer quantity;
 
@@ -34,11 +34,11 @@ public class MaterialRequestDTO {
         this.collection_id = collection_id;
     }
 
-    public List<MaterialAPI> getMaterials() {
+    public List<MaterialRequest> getMaterials() {
         return materials;
     }
 
-    public void setMaterials(List<MaterialAPI> materials) {
+    public void setMaterials(List<MaterialRequest> materials) {
         this.materials = materials;
     }
 }

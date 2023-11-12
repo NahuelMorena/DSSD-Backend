@@ -6,6 +6,7 @@ import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
@@ -20,7 +21,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -30,7 +35,8 @@ public class CollectionController {
 	private CollectionService collectionService;
 	@Autowired
 	private BonitaService bonitaService;
-
+	@Autowired
+	private CloudApiService cloudApiService;
     private final String baseUrl = "/api/collections";
 
     @GetMapping(baseUrl + "/get-collections")
@@ -65,12 +71,18 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/search-material-offers")
 	public ResponseEntity<List<OffertsByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
-		System.out.println("entro a este endpoint");
-		System.out.println(request.getCollection_id());
-		System.out.println(request.getMaterials().get(0).getName());
-		System.out.println(request.getMaterials().get(0).getQuantity());
-		System.out.println("--------------");
-		return null;
+		List<OffertsByApiDTO> offerts = new ArrayList<>();
+		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
+		if (collection.isPresent()){
+			LocalDate date = collection.get().getDate_start_manufacture();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			String formattedDate = date.format(formatter);
+
+			for (MaterialRequestDTO.MaterialRequest material : request.getMaterials()) {
+				offerts.addAll(cloudApiService.getOffersByMaterial(material.getName(), formattedDate));
+			}
+		}
+		return ResponseEntity.ok(offerts);
 	}
 
 	/**
