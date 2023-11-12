@@ -1,11 +1,12 @@
 package dssd.global.furniture.backend.controllers;
 
 import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
-import dssd.global.furniture.backend.model.Category;
+import dssd.global.furniture.backend.controllers.dtos.MaterialRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
 import dssd.global.furniture.backend.model.Collection;
-import dssd.global.furniture.backend.model.Furniture;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
@@ -21,10 +22,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class CollectionController {
@@ -33,13 +35,15 @@ public class CollectionController {
 	private CollectionService collectionService;
 	@Autowired
 	private BonitaService bonitaService;
-	
-	
+	@Autowired
+	private CloudApiService cloudApiService;
     private final String baseUrl = "/api/collections";
 
     @GetMapping(baseUrl + "/get-collections")
-    public HttpEntity<List<Collection>> getCollections(){
-       return ResponseEntity.ok(this.collectionService.getAllCollections());
+    public HttpEntity<List<CollectionDTO>> getCollections(){
+		List<Collection> collections = this.collectionService.getAllCollections();
+		List<CollectionDTO> collectionDTOs = this.convertToDTOs(collections);
+        return ResponseEntity.ok(collectionDTOs);
     }
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
@@ -54,8 +58,7 @@ public class CollectionController {
     			}
     	try {
 			Long caseId=this.bonitaService.startCase();
-			this.bonitaService.assignTaskToUser(caseId,newCollection.getDate_start_manufacture(),newCollection.getDate_end_manufacture(),
-					newCollection.getEstimated_release_date());
+			this.bonitaService.assignTaskToUser(caseId, newCollection);
 		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,4 +67,40 @@ public class CollectionController {
     	return ResponseEntity.ok(newCollection);
     	
     }
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/search-material-offers")
+	public ResponseEntity<List<OffertsByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
+		List<OffertsByApiDTO> offerts = new ArrayList<>();
+		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
+		if (collection.isPresent()){
+			LocalDate date = collection.get().getDate_start_manufacture();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			String formattedDate = date.format(formatter);
+
+			for (MaterialRequestDTO.MaterialRequest material : request.getMaterials()) {
+				offerts.addAll(cloudApiService.getOffersByMaterial(material.getName(), formattedDate));
+			}
+		}
+		return ResponseEntity.ok(offerts);
+	}
+
+	/**
+	 *
+	 * METODOS PRIVADOS
+	 *
+	 */
+
+	private List<CollectionDTO> convertToDTOs(List<Collection> collections){
+		return collections.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
+	private CollectionDTO convertToDTO(Collection collection) {
+		CollectionDTO dto = new CollectionDTO();
+		dto.setId(collection.getID());
+		dto.setDate_start_manufacture(collection.getDate_start_manufacture());
+		dto.setDate_end_manufacture(collection.getDate_end_manufacture());
+		dto.setEstimated_release_date(collection.getEstimated_release_date());
+		dto.setFurnitures(collection.getFurnitures().stream().map(FurnitureInCollection::getFurniture).collect(Collectors.toList()));
+		return dto;
+	}
 }

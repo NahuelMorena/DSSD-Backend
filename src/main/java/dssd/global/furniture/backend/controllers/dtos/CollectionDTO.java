@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import dssd.global.furniture.backend.model.Furniture;
+import dssd.global.furniture.backend.model.Material;
 
 public class CollectionDTO {
+
+	private Long id;
 	private LocalDate date_start_manufacture;
 
     private LocalDate date_end_manufacture;
@@ -13,6 +16,8 @@ public class CollectionDTO {
     private LocalDate  estimated_release_date;
     
     private List<Furniture> furnitures;
+
+	private List<Material> materials;
 
 	public LocalDate getDate_start_manufacture() {
 		return date_start_manufacture;
@@ -46,5 +51,15 @@ public class CollectionDTO {
 		this.furnitures = furnitures;
 	}
     
-    
+    public Long getId() { return id;}
+
+	public void setId(Long id){ this.id = id;}
+
+	public List<Material> getMaterials() {
+		return materials;
+	}
+
+	public void setMaterials(List<Material> materials) {
+		this.materials = materials;
+	}
 }

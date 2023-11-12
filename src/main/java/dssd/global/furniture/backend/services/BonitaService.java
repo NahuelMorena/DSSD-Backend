@@ -1,7 +1,6 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,13 +9,12 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import dssd.global.furniture.backend.model.Collection;
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
-import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
-import org.bonitasoft.engine.bpm.flownode.ActivityInstanceCriterion;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
 import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
@@ -28,7 +26,6 @@ import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessEnablementException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.bpm.process.ProcessInstance;
-import org.bonitasoft.engine.bpm.process.ProcessInstanceSearchDescriptor;
 import org.bonitasoft.engine.exception.SearchException;
 import org.bonitasoft.engine.exception.UpdateException;
 import org.bonitasoft.engine.expression.Expression;
@@ -47,14 +44,12 @@ import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchOptionsBuilder;
 import org.bonitasoft.engine.search.SearchResult;
 import org.bonitasoft.engine.session.APISession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
 import dssd.global.furniture.backend.utils.Constantes;
-
-
-
 
 @Service
 @RestController
@@ -107,25 +102,7 @@ public class BonitaService {
 		}
 	}
 	
-	public void enableProcess(ProcessDefinition processDefinition) {
-		try {
-			
-			this.getProcessAPI().enableProcess(processDefinition.getId());
-			System.out.println("A new process was enabled: " + processDefinition.getId());
-			
-		} catch (ProcessDefinitionNotFoundException e) {
-			System.out.println("NO SE ENCONTRO LA DEFINICION DEL PROCESO al hacer enable");
-			e.printStackTrace();
-		} catch (ProcessEnablementException e) {
-			System.out.println("Paso algo al intentar hacer enable process definition");
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
-	public void assignTaskToUser(Long processInstanceId,LocalDate date_start_manufacture,LocalDate date_end_manufacture,
-			LocalDate estimated_release_date) {
+	public void assignTaskToUser(Long processInstanceId, Collection collection){
 		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 30, null);
 		HumanTaskInstance ultimaTareaPendienteCasoActual=null;
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
@@ -139,8 +116,12 @@ public class BonitaService {
 			try {
 				this.getProcessAPI().assignUserTask(ultimaTareaPendienteCasoActual.getId(),this.getCurrentLoggedInUser().getId());
 				try {
-					 Map<String, Serializable> taskVariables = new HashMap<>();
-					 taskVariables.put("inicio_fabricación", Date.from(date_start_manufacture.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+					Map<String, Serializable> taskVariables = new HashMap<>();
+					taskVariables.put("id_collection", collection.getID());
+					taskVariables.put("date_start_manufacture", Date.from(collection.getDate_start_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+					taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+					taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
 					this.getProcessAPI().updateActivityInstanceVariables(ultimaTareaPendienteCasoActual.getId(),taskVariables);
 					this.getProcessAPI().executeUserTask(ultimaTareaPendienteCasoActual.getId(),null);
 				} catch (UserTaskNotFoundException | FlowNodeExecutionException | ContractViolationException e) {
@@ -150,10 +131,8 @@ public class BonitaService {
 				e.printStackTrace();
 			}
 		}
-	    }
+	}
 
-
-	
 	public Long startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
 		 
 		ProcessDefinition processDefinition = this.getProcessDefinition(
@@ -172,7 +151,42 @@ public class BonitaService {
 		final SearchResult<ProcessDeploymentInfo> deploymentInfoResults = this.getProcessAPI().searchProcessDeploymentInfos(searchOptions);
 		return deploymentInfoResults;
 	}
-	
+
+	public void executeTask(long userId, long taskInstanceId) throws UserTaskNotFoundException, FlowNodeExecutionException, ContractViolationException{
+		//No hace nada aun
+		String s =this.getProcessAPI()
+				.getActivities(
+						this.getProcessDefinitionId​(Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO),
+						0,
+						12
+				)
+				.toString();
+		System.out.println("Lista: " + s);
+
+		//apiClient.getProcessAPI().assignAndExecuteUserTask(userId, getProcess, null);
+		//this.getProcessAPI().executeUserTask(userId, taskInstanceId, null);
+	}
+
+
+	/*-----------------------------------------------------------------------------------
+										Metodos no utilizados
+	------------------------------------------------------------------------------------- */
+
+	public void enableProcess(ProcessDefinition processDefinition) {
+		try {
+
+			this.getProcessAPI().enableProcess(processDefinition.getId());
+			System.out.println("A new process was enabled: " + processDefinition.getId());
+
+		} catch (ProcessDefinitionNotFoundException e) {
+			System.out.println("NO SE ENCONTRO LA DEFINICION DEL PROCESO al hacer enable");
+			e.printStackTrace();
+		} catch (ProcessEnablementException e) {
+			System.out.println("Paso algo al intentar hacer enable process definition");
+			e.printStackTrace();
+		}
+
+	}
 /* Set string variables and start a process instance
  * In this example, createInstance takes the process definition name, the process version, 
  * a map of text variables and their values. The startProcess method, which creates the process instance,
@@ -202,11 +216,11 @@ public class BonitaService {
 	}
 
 	private Operation buildAssignOperation(final String dataInstanceName, final String newConstantValue,
-	    final String className, final ExpressionType expressionType) throws InvalidExpressionException {
-	    final LeftOperand leftOperand = new LeftOperandBuilder().createNewInstance().setName(dataInstanceName).done();
-	    final Expression expression = new ExpressionBuilder().createNewInstance(dataInstanceName).setContent(newConstantValue).setExpressionType(expressionType.name()).setReturnType(className).done();
-	    final Operation operation = new OperationBuilder().createNewInstance().setOperator("=").setLeftOperand(leftOperand).setType(OperatorType.ASSIGNMENT).setRightOperand(expression).done();
-	    return operation;
+										   final String className, final ExpressionType expressionType) throws InvalidExpressionException {
+		final LeftOperand leftOperand = new LeftOperandBuilder().createNewInstance().setName(dataInstanceName).done();
+		final Expression expression = new ExpressionBuilder().createNewInstance(dataInstanceName).setContent(newConstantValue).setExpressionType(expressionType.name()).setReturnType(className).done();
+		final Operation operation = new OperationBuilder().createNewInstance().setOperator("=").setLeftOperand(leftOperand).setType(OperatorType.ASSIGNMENT).setRightOperand(expression).done();
+		return operation;
 	}
 	
 	
@@ -265,21 +279,5 @@ public class BonitaService {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	}
-	
-
-	public void executeTask(long userId, long taskInstanceId) throws UserTaskNotFoundException, FlowNodeExecutionException, ContractViolationException{
-		//No hace nada aun
-		String s =this.getProcessAPI()
-				.getActivities(
-						this.getProcessDefinitionId​(Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO), 
-						0, 
-						12
-				)
-		.toString();
-		System.out.println("Lista: " + s);
-		
-		//apiClient.getProcessAPI().assignAndExecuteUserTask(userId, getProcess, null);
-		//this.getProcessAPI().executeUserTask(userId, taskInstanceId, null);
 	}
 }
