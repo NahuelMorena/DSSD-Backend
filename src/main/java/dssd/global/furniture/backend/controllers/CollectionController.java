@@ -4,6 +4,7 @@ import dssd.global.furniture.backend.controllers.dtos.*;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
@@ -11,11 +12,14 @@ import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
+import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -67,6 +72,23 @@ public class CollectionController {
 			return ResponseEntity.badRequest().build();
 		}
     	return ResponseEntity.ok(newCollection);
+    	
+    }
+    
+    @CrossOrigin(origins="http://localhost:4200",allowCredentials="true")
+    @PostMapping(value=baseUrl + "/establishMaterials")
+    public ResponseEntity<String> establishMaterials(@RequestBody MaterialRequestDTO request){
+    	HttpHeaders httpHeaders = new HttpHeaders();
+	    httpHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
+    	Optional<Collection> collection=this.collectionService.getCollectionByID(request.getCollection_id());
+    	if(collection.isPresent()) {
+        	collectionService.createMaterialInCollection(collection.get(),request.getMaterials());
+        	return new ResponseEntity<String>("Materiales establecidos exitosamente", httpHeaders, HttpStatus.SC_OK);
+    	}else {
+    		return new ResponseEntity<String>("Error al establecer materiales de la colección", httpHeaders, HttpStatus.SC_BAD_REQUEST);
+    	}
+ 
+    	
     	
     }
 

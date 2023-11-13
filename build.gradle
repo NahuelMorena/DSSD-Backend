@@ -6,6 +6,7 @@ plugins {
 
 group = 'dssd.global.furniture'
 version = '0.0.1-SNAPSHOT'
+apply plugin: "eclipse"
 
 java {
 	sourceCompatibility = '17'

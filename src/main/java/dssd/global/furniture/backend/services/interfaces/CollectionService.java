@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.Furniture;
 
@@ -18,4 +20,6 @@ public interface CollectionService {
 	public List<Collection> getAllCollections();
 
 	public Optional<Collection> getCollectionByID(Long id);
+	
+	public void createMaterialInCollection(Collection collection, List<MaterialRequest> lm);
 }
