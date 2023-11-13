@@ -1,8 +1,10 @@
 package dssd.global.furniture.backend.controllers;
 
-import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
-import dssd.global.furniture.backend.controllers.dtos.MaterialRequestDTO;
-import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.*;
+import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.services.BonitaService;
@@ -70,8 +72,8 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/search-material-offers")
-	public ResponseEntity<List<OffertsByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
-		List<OffertsByApiDTO> offerts = new ArrayList<>();
+	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
+		List<OffersByApiDTO> offerts = new ArrayList<>();
 		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
 		if (collection.isPresent()){
 			LocalDate date = collection.get().getDate_start_manufacture();
@@ -83,6 +85,16 @@ public class CollectionController {
 			}
 		}
 		return ResponseEntity.ok(offerts);
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/reserve-materials")
+	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@RequestBody OffersToReserveDTO request){
+		List<ReserveByApiDTO> reserves = new ArrayList<>();
+		for (OffersToReserveDTO.Offer offer : request.getOffers()){
+			reserves.add(cloudApiService.reserveMaterials(offer));
+		}
+		return ResponseEntity.ok(reserves);
 	}
 
 	/**

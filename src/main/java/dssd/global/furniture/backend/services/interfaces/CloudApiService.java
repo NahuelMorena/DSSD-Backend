@@ -1,7 +1,8 @@
 package dssd.global.furniture.backend.services.interfaces;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
+import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,5 +11,6 @@ import java.util.List;
 public interface CloudApiService {
 
     public String authenticate();
-    public List<OffertsByApiDTO> getOffersByMaterial(String materialName, String date);
+    public List<OffersByApiDTO> getOffersByMaterial(String materialName, String date);
+    public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer);
 }

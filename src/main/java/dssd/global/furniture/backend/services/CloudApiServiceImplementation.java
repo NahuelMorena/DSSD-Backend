@@ -1,9 +1,10 @@
 package dssd.global.furniture.backend.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dssd.global.furniture.backend.controllers.dtos.OffertsByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
+import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -60,7 +61,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
         return this.authToken;
     }
     @Override
-    public List<OffertsByApiDTO> getOffersByMaterial(String materialName, String date) {
+    public List<OffersByApiDTO> getOffersByMaterial(String materialName, String date) {
         RestTemplate restTemplate = restTemplateBuilder.build();
 
         if (authToken == null){
@@ -78,15 +79,53 @@ public class CloudApiServiceImplementation implements CloudApiService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<OffertsByApiDTO[]> responseEntity = restTemplate.exchange(
-                    url,HttpMethod.GET,entity,OffertsByApiDTO[].class
+            ResponseEntity<OffersByApiDTO[]> responseEntity = restTemplate.exchange(
+                    url,HttpMethod.GET,entity, OffersByApiDTO[].class
             );
-            OffertsByApiDTO[] response = responseEntity.getBody();
+            OffersByApiDTO[] response = responseEntity.getBody();
             return Arrays.asList(response);
 
         } catch (HttpClientErrorException.Forbidden e) {
             e.printStackTrace();
             throw new RuntimeException("Error 403, error de autenticacion JWT");
         }
+    }
+
+    @Override
+    public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+
+        if (authToken == null){
+            throw new RuntimeException("Token de autenticación no disponible");
+        }
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/reserve/")
+                .toUriString();
+
+
+        Map<String, String> data = new HashMap<>();
+        data.put("idProviderOfferMaterial", offer.getIdProviderOfferMaterial().toString());
+        data.put("quantity", offer.getQuantity().toString());
+
+        try {
+            String jsonBody = new ObjectMapper().writeValueAsString(data);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(this.authToken);
+            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url, HttpMethod.POST, entity, String.class
+            );
+
+            String responseBody = responseEntity.getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(responseBody, ReserveByApiDTO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

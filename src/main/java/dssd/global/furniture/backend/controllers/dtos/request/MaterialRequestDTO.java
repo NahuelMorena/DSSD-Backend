@@ -1,4 +1,4 @@
-package dssd.global.furniture.backend.controllers.dtos;
+package dssd.global.furniture.backend.controllers.dtos.request;
 
 import java.util.List;
 
