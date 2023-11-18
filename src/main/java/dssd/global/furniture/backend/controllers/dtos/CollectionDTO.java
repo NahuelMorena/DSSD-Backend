@@ -10,13 +10,10 @@ public class CollectionDTO {
 
 	private Long id;
 	private LocalDate date_start_manufacture;
-
     private LocalDate date_end_manufacture;
-
     private LocalDate  estimated_release_date;
-    
+	private Integer units;
     private List<Furniture> furnitures;
-
 	private List<Material> materials;
 
 	public LocalDate getDate_start_manufacture() {
@@ -55,11 +52,13 @@ public class CollectionDTO {
 
 	public void setId(Long id){ this.id = id;}
 
-	public List<Material> getMaterials() {
-		return materials;
-	}
+	public List<Material> getMaterials() { return materials; }
 
 	public void setMaterials(List<Material> materials) {
 		this.materials = materials;
 	}
+
+	public Integer getUnits() { return units; }
+
+	public void setUnits(Integer units) { this.units = units; }
 }

@@ -32,6 +32,8 @@ public class Collection {
 
     private LocalDate estimated_release_date;
 
+    private Integer units;
+
     public Collection(){}
 
     public Collection(Long id, LocalDate date_start_manufacture, LocalDate date_end_manufacture, LocalDate estimated_release_date, Set<FurnitureInCollection> furnitures) {
@@ -44,10 +46,11 @@ public class Collection {
     
     
 
-	public Collection(LocalDate date_start_manufacture,LocalDate date_end_manufacture, LocalDate estimated_release_date) {
+	public Collection(LocalDate date_start_manufacture,LocalDate date_end_manufacture, LocalDate estimated_release_date, Integer units) {
 		this.date_start_manufacture = date_start_manufacture;
 		this.date_end_manufacture = date_end_manufacture;
 		this.estimated_release_date = estimated_release_date;
+        this.units = units;
 	}
 
 	public Set<FurnitureInCollection> getFurnitures() {
@@ -91,6 +94,14 @@ public class Collection {
 
     public void setMaterials(Set<MaterialInCollection> materials) {
         this.materials = materials;
+    }
+
+    public Integer getUnits() {
+        return units;
+    }
+
+    public void setUnits(Integer units) {
+        this.units = units;
     }
 
     @Override

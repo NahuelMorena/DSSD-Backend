@@ -59,7 +59,7 @@ public class CollectionController {
     	Collection newCollection=null;
     	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null && request.getEstimated_release_date()!=null){
     			newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
-    			request.getEstimated_release_date(), request.getFurnitures());
+    			request.getEstimated_release_date(), request.getFurnitures(), request.getUnits());
     	}else {
     			return ResponseEntity.badRequest().build();	
     			}
