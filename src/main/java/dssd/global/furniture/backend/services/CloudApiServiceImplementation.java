@@ -2,6 +2,7 @@ package dssd.global.furniture.backend.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
@@ -127,5 +128,34 @@ public class CloudApiServiceImplementation implements CloudApiService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<DateSpaceApiDTO> getDateSpaces() {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+
+        if (authToken == null){
+            throw new RuntimeException("Token de autenticación no disponible");
+        }
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("/dateSpaces/getAvailableSpaces")
+                .toUriString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(this.authToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<DateSpaceApiDTO[]> responseEntity = restTemplate.exchange(
+                    url,HttpMethod.GET,entity, DateSpaceApiDTO[].class
+            );
+            DateSpaceApiDTO[] response = responseEntity.getBody();
+            return Arrays.asList(response);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error 403, error de autenticacion JWT");
+        }
     }
 }

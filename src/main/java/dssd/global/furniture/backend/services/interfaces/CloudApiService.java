@@ -1,5 +1,6 @@
 package dssd.global.furniture.backend.services.interfaces;
 
+import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
@@ -13,4 +14,6 @@ public interface CloudApiService {
     public String authenticate();
     public List<OffersByApiDTO> getOffersByMaterial(String materialName, String date);
     public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer);
+
+    public List<DateSpaceApiDTO> getDateSpaces();
 }

@@ -1,6 +1,7 @@
 package dssd.global.furniture.backend.controllers;
 
 import dssd.global.furniture.backend.controllers.dtos.*;
+import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
@@ -142,6 +143,12 @@ public class CollectionController {
 			orders.add(distributionOrderService.setDistributionOrder(store, collection, order.getQuantity()));
 		}
 		return ResponseEntity.ok(orders);
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@GetMapping(baseUrl + "/get-dateSpaces")
+	public ResponseEntity<List<DateSpaceApiDTO>> getDateSpaces(){
+		return ResponseEntity.ok(cloudApiService.getDateSpaces());
 	}
 
 
