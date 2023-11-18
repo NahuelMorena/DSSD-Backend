@@ -8,6 +8,7 @@ import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OrdersRequestDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.DistributionOrders;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
@@ -151,6 +152,11 @@ public class CollectionController {
 		return ResponseEntity.ok(cloudApiService.getDateSpaces());
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/reserve-dateSpace")
+	public ResponseEntity<DateSpaceApiDTO> reserveDateSpace(@RequestBody ReserveDateSpaceRequestDTO request){
+		return ResponseEntity.ok(cloudApiService.reserveDateSpace(request));
+	}
 
 	/**
 	 *

@@ -1,11 +1,13 @@
 package dssd.global.furniture.backend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -157,5 +159,43 @@ public class CloudApiServiceImplementation implements CloudApiService {
             e.printStackTrace();
             throw new RuntimeException("Error 403, error de autenticacion JWT");
         }
+    }
+
+    @Override
+    public DateSpaceApiDTO reserveDateSpace(ReserveDateSpaceRequestDTO reserveDateSpace) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+
+        if (authToken == null){
+            throw new RuntimeException("Token de autenticación no disponible");
+        }
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("/dateSpaces/reserveManufacturingSpace/" + reserveDateSpace.getDateSpace_id())
+                .toUriString();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonReserves;
+        try {
+            jsonReserves = objectMapper.writeValueAsString(reserveDateSpace.getReserves());
+        } catch (JsonProcessingException e){
+            throw new RuntimeException("Error al convertir la lista en JSON");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(jsonReserves, headers);
+
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url, HttpMethod.PUT, entity, String.class
+            );
+
+            String responseBody = responseEntity.getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(responseBody, DateSpaceApiDTO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
