@@ -6,12 +6,17 @@ import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.OrdersRequestDTO;
 import dssd.global.furniture.backend.model.Collection;
+import dssd.global.furniture.backend.model.DistributionOrders;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
+import dssd.global.furniture.backend.model.Store;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
+import dssd.global.furniture.backend.services.interfaces.DistributionOrderService;
+import dssd.global.furniture.backend.services.interfaces.StoreService;
 import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
@@ -44,6 +49,12 @@ public class CollectionController {
 	private BonitaService bonitaService;
 	@Autowired
 	private CloudApiService cloudApiService;
+	@Autowired
+	private DistributionOrderService distributionOrderService;
+
+	@Autowired
+	private StoreService storeService;
+
     private final String baseUrl = "/api/collections";
 
     @GetMapping(baseUrl + "/get-collections")
@@ -118,6 +129,21 @@ public class CollectionController {
 		}
 		return ResponseEntity.ok(reserves);
 	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/set-distribution-order")
+	public ResponseEntity<List<DistributionOrders>> setDistributionOrder(@RequestBody OrdersRequestDTO request){
+		List<DistributionOrders> orders = new ArrayList<>();
+		Collection collection = collectionService.getCollectionByID(request.getCollection_id())
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		for (OrdersRequestDTO.OrderRequest order : request.getOrders()){
+			Store store = storeService.getStoreByID(order.getId_store())
+							.orElseThrow(() -> new RuntimeException("La tienda no se encontro"));
+			orders.add(distributionOrderService.setDistributionOrder(store, collection, order.getQuantity()));
+		}
+		return ResponseEntity.ok(orders);
+	}
+
 
 	/**
 	 *
