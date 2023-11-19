@@ -38,8 +38,8 @@ public class CollectionServiceImplementation implements CollectionService {
 	
 	@Transactional
 	public Collection createCollection(LocalDate date_start_manufacture, LocalDate date_end_manufacture,
-									   LocalDate estimated_release_date, List<Furniture> furnitures) {
-		Collection collection=new Collection(date_start_manufacture,date_end_manufacture,estimated_release_date);
+									   LocalDate estimated_release_date, List<Furniture> furnitures, Integer units) {
+		Collection collection=new Collection(date_start_manufacture,date_end_manufacture,estimated_release_date, units);
 		Collection savedCollection = collectionRepository.save(collection);
 		for(Furniture furniture: furnitures) {
     		FurnitureInCollection fc=new FurnitureInCollection(savedCollection,furniture);
