@@ -6,15 +6,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import dssd.global.furniture.backend.controllers.dtos.TaskStablishMaterialsDTO;
+import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
 import dssd.global.furniture.backend.model.Collection;
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
+import org.bonitasoft.engine.bpm.data.DataInstance;
+import org.bonitasoft.engine.bpm.data.impl.DataDefinitionImpl;
+import org.bonitasoft.engine.bpm.data.impl.DataInstanceImpl;
+import org.bonitasoft.engine.bpm.flownode.ActivityDefinitionNotFoundException;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstanceNotFoundException;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
 import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
@@ -26,10 +34,13 @@ import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessEnablementException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.bpm.process.ProcessInstance;
+import org.bonitasoft.engine.bpm.process.ProcessInstanceNotFoundException;
+import org.bonitasoft.engine.bpm.process.impl.DataDefinitionBuilder;
 import org.bonitasoft.engine.exception.SearchException;
 import org.bonitasoft.engine.exception.UpdateException;
 import org.bonitasoft.engine.expression.Expression;
 import org.bonitasoft.engine.expression.ExpressionBuilder;
+import org.bonitasoft.engine.expression.ExpressionEvaluationException;
 import org.bonitasoft.engine.expression.ExpressionType;
 import org.bonitasoft.engine.expression.InvalidExpressionException;
 import org.bonitasoft.engine.identity.User;
@@ -48,14 +59,20 @@ import org.bonitasoft.engine.session.APISession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import dssd.global.furniture.backend.utils.Constantes;
-
 @Service
 @RestController
 public class BonitaService {
 	@Autowired
 	APIClient apiClient;
+	
+	@Autowired
+	BonitaApiService bonitaApiService;
+	
+	@Autowired 
+	CollectionServiceImplementation collectionService;
 	
 	public IdentityAPI getIdentityAPI() {
 		return this.apiClient.getIdentityAPI();
@@ -81,6 +98,7 @@ public class BonitaService {
 			return null;
 		}
 	}
+	
 	
 	public long getProcessDefinitionId​(String name, String version) {
 		try {
@@ -121,7 +139,6 @@ public class BonitaService {
 					taskVariables.put("date_start_manufacture", Date.from(collection.getDate_start_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 					taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 					taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
 					this.getProcessAPI().updateActivityInstanceVariables(ultimaTareaPendienteCasoActual.getId(),taskVariables);
 					this.getProcessAPI().executeUserTask(ultimaTareaPendienteCasoActual.getId(),null);
 				} catch (UserTaskNotFoundException | FlowNodeExecutionException | ContractViolationException e) {
@@ -132,6 +149,30 @@ public class BonitaService {
 			}
 		}
 	}
+	
+	public List<TaskStablishMaterialsDTO> getAllStablishMaterials() {
+		if(! this.bonitaApiService.isAuthenticated()) {
+			this.bonitaApiService.login();
+		}
+		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 100, null);
+		List<TaskStablishMaterialsDTO> listStablishMaterials=new ArrayList<TaskStablishMaterialsDTO>();
+		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
+	        HumanTaskInstance item = i.next();
+			if(item.getName().equals("Establecer materiales")) {
+				String idCase=String.valueOf(item.getParentProcessInstanceId());
+				VariableBonita vb=this.bonitaApiService.getIdCollectionCase(idCase);
+				Optional<Collection> c=this.collectionService.getCollectionByID(Long.valueOf(vb.getValue()));
+				if(c.isPresent()) {
+					Collection collection=c.get();
+					TaskStablishMaterialsDTO ts=new TaskStablishMaterialsDTO(item.getId(),item.getParentProcessInstanceId(),item.getName(),collection.getID()
+					, collection.getDate_start_manufacture(),collection.getDate_end_manufacture(), collection.getEstimated_release_date());
+					listStablishMaterials.add(ts);
+				}
+			}
+		}
+		return listStablishMaterials;
+	}
+	
 
 	public Long startCase() throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException {
 		 

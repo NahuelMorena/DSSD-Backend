@@ -33,7 +33,6 @@ public class BonitaConfig {
 		System.out.println(settings.toString());
     	// First of all, let's log in on the engine:
     	org.bonitasoft.engine.api.APIClient apiClient = new APIClient();
-    	
 		apiClient.login("walter.bates", "bpm"); // use "install" / "install" if you don't have any other user created
     	
     	return apiClient;

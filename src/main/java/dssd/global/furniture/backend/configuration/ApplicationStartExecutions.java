@@ -17,7 +17,9 @@ import org.bonitasoft.engine.session.APISession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import dssd.global.furniture.backend.services.BonitaService;
 
