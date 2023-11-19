@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 @Service
@@ -25,24 +26,44 @@ public class CloudApiServiceImplementation implements CloudApiService {
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
 
+    private RestTemplate getRestTemplate(){
+        return restTemplateBuilder.build();
+    }
+    private void verifyToken(){
+        if (this.authToken == null){
+            throw new RuntimeException("Token de autenticación no disponible");
+        }
+    }
+
+    private HttpEntity<String> assembleHeader(String jsonBody){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(this.authToken);
+        if (jsonBody == null) {
+            return new HttpEntity<>(headers);
+        }
+        return new HttpEntity<>(jsonBody, headers);
+    }
+
     @Override
     public String authenticate() {
-        RestTemplate restTemplate = restTemplateBuilder.build();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
                 .path("auth/login")
                 .toUriString();
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, String> credentials = new HashMap<>();
         credentials.put("username", "usuario");
         credentials.put("password", "1234");
+
         try {
             String jsonBody = new ObjectMapper().writeValueAsString(credentials);
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
 
-            ResponseEntity<String> responseEntity = restTemplate.exchange(
+            ResponseEntity<String> responseEntity = this.getRestTemplate().exchange(
                  url, HttpMethod.POST, entity, String.class
             );
 
@@ -61,11 +82,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
     }
     @Override
     public List<OffersByApiDTO> getOffersByMaterial(String materialName, String date) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        if (authToken == null){
-            throw new RuntimeException("Token de autenticación no disponible");
-        }
+        this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
                 .path("offersMaterial")
@@ -73,13 +90,9 @@ public class CloudApiServiceImplementation implements CloudApiService {
                 .queryParam("dateStartManufacture", date)
                 .toUriString();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.authToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
         try {
-            ResponseEntity<OffersByApiDTO[]> responseEntity = restTemplate.exchange(
-                    url,HttpMethod.GET,entity, OffersByApiDTO[].class
+            ResponseEntity<OffersByApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.GET, this.assembleHeader(null), OffersByApiDTO[].class
             );
             OffersByApiDTO[] response = responseEntity.getBody();
             return Arrays.asList(response);
@@ -92,31 +105,21 @@ public class CloudApiServiceImplementation implements CloudApiService {
 
     @Override
     public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        if (authToken == null){
-            throw new RuntimeException("Token de autenticación no disponible");
-        }
+        this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
                 .path("reserveMaterials/reserve/")
                 .toUriString();
 
-
-        Map<String, String> data = new HashMap<>();
-        data.put("idProviderOfferMaterial", offer.getIdProviderOfferMaterial().toString());
-        data.put("quantity", offer.getQuantity().toString());
-
         try {
+            Map<String, String> data = new HashMap<>();
+            data.put("idProviderOfferMaterial", offer.getIdProviderOfferMaterial().toString());
+            data.put("quantity", offer.getQuantity().toString());
             String jsonBody = new ObjectMapper().writeValueAsString(data);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(this.authToken);
-            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
 
-            ResponseEntity<String> responseEntity = restTemplate.exchange(
-                    url, HttpMethod.POST, entity, String.class
+            ResponseEntity<String> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), String.class
             );
 
             String responseBody = responseEntity.getBody();
@@ -130,23 +133,16 @@ public class CloudApiServiceImplementation implements CloudApiService {
 
     @Override
     public List<DateSpaceApiDTO> getDateSpaces() {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        if (authToken == null){
-            throw new RuntimeException("Token de autenticación no disponible");
-        }
+        this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
                 .path("/dateSpaces/getAvailableSpaces")
                 .toUriString();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.authToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<DateSpaceApiDTO[]> responseEntity = restTemplate.exchange(
-                    url,HttpMethod.GET,entity, DateSpaceApiDTO[].class
+            ResponseEntity<DateSpaceApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.GET, this.assembleHeader(null), DateSpaceApiDTO[].class
             );
             DateSpaceApiDTO[] response = responseEntity.getBody();
             return Arrays.asList(response);
@@ -159,11 +155,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
 
     @Override
     public DateSpaceApiDTO reserveDateSpace(ReserveDateSpaceRequestDTO reserveDateSpace) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        if (authToken == null){
-            throw new RuntimeException("Token de autenticación no disponible");
-        }
+        this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
                 .path("dateSpaces/reserveManufacturingSpace/")//
@@ -175,13 +167,9 @@ public class CloudApiServiceImplementation implements CloudApiService {
                     Collections.singletonMap("reserves", reserveDateSpace.getReserves());
 
             String jsonBody = new ObjectMapper().writeValueAsString(requestBody);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(this.authToken);
-            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
 
-            ResponseEntity<String> responseEntity = restTemplate.exchange(
-                    url, HttpMethod.PUT, entity, String.class
+            ResponseEntity<String> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.PUT, this.assembleHeader(jsonBody), String.class
             );
 
             String responseBody = responseEntity.getBody();
