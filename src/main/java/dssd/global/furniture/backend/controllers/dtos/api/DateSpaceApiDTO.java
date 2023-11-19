@@ -1,5 +1,4 @@
 package dssd.global.furniture.backend.controllers.dtos.api;
-
 import java.util.List;
 
 public class DateSpaceApiDTO {

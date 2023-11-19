@@ -8,14 +8,14 @@ public class ReserveDateSpaceRequestDTO {
     private List<ReserveID> reserves;
 
     public static class ReserveID {
-        private long reserve_id;
+        private long id;
 
-        public long getReserve_id() {
-            return reserve_id;
+        public long getId() {
+            return id;
         }
 
-        public void setReserve_id(long reserve_id) {
-            this.reserve_id = reserve_id;
+        public void setId(long id) {
+            this.id = id;
         }
     }
 

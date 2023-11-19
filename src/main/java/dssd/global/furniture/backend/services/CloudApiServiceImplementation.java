@@ -1,6 +1,5 @@
 package dssd.global.furniture.backend.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
@@ -17,10 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CloudApiServiceImplementation implements CloudApiService {
@@ -170,22 +166,20 @@ public class CloudApiServiceImplementation implements CloudApiService {
         }
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
-                .path("/dateSpaces/reserveManufacturingSpace/" + reserveDateSpace.getDateSpace_id())
+                .path("dateSpaces/reserveManufacturingSpace/")//
+                .path(String.valueOf(reserveDateSpace.getDateSpace_id()))
                 .toUriString();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonReserves;
         try {
-            jsonReserves = objectMapper.writeValueAsString(reserveDateSpace.getReserves());
-        } catch (JsonProcessingException e){
-            throw new RuntimeException("Error al convertir la lista en JSON");
-        }
+            Map<String, List<ReserveDateSpaceRequestDTO.ReserveID>> requestBody =
+                    Collections.singletonMap("reserves", reserveDateSpace.getReserves());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(jsonReserves, headers);
+            String jsonBody = new ObjectMapper().writeValueAsString(requestBody);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(this.authToken);
+            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
 
-        try {
             ResponseEntity<String> responseEntity = restTemplate.exchange(
                     url, HttpMethod.PUT, entity, String.class
             );
@@ -193,6 +187,8 @@ public class CloudApiServiceImplementation implements CloudApiService {
             String responseBody = responseEntity.getBody();
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(responseBody, DateSpaceApiDTO.class);
+        } catch (HttpClientErrorException.Forbidden e) {
+            throw new RuntimeException("Error 403, error de autenticación JWT");
         } catch (Exception e) {
             e.printStackTrace();
         }
