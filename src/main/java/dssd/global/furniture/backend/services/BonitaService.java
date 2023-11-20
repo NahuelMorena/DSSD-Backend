@@ -1,6 +1,7 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
+import java.lang.reflect.InaccessibleObjectException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,8 +13,12 @@ import java.util.Iterator;
 
 import dssd.global.furniture.backend.controllers.dtos.TaskStablishMaterialsDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
+import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
 import dssd.global.furniture.backend.model.Collection;
+
+import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.api.APIClient;
+import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
@@ -50,21 +55,24 @@ import org.bonitasoft.engine.operation.LeftOperandBuilder;
 import org.bonitasoft.engine.operation.Operation;
 import org.bonitasoft.engine.operation.OperationBuilder;
 import org.bonitasoft.engine.operation.OperatorType;
+import org.bonitasoft.engine.platform.LoginException;
+import org.bonitasoft.engine.platform.LogoutException;
 import org.bonitasoft.engine.search.Order;
 import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchOptionsBuilder;
 import org.bonitasoft.engine.search.SearchResult;
 import org.bonitasoft.engine.session.APISession;
-
+import org.bonitasoft.engine.util.APITypeManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import dssd.global.furniture.backend.utils.Constantes;
 @Service
-@RestController
 public class BonitaService {
+	
 	@Autowired
 	APIClient apiClient;
 	
@@ -73,6 +81,27 @@ public class BonitaService {
 	
 	@Autowired 
 	CollectionServiceImplementation collectionService;
+	
+	public boolean logout() {
+		try {
+			this.apiClient.logout();
+			return true;
+		} catch (LogoutException e) {
+			return false;
+		}
+	}
+	
+	public boolean login(LoginRequest lr) {
+		try {
+			apiClient.login(lr.getUsername(),lr.getPassword());
+			System.out.println("El usuario con sesión iniciada es: "+this.getSession().getUserName());
+			return true;
+		} catch (InaccessibleObjectException | LoginException e) {
+			return false;
+		}
+		
+	
+	}
 	
 	public IdentityAPI getIdentityAPI() {
 		return this.apiClient.getIdentityAPI();

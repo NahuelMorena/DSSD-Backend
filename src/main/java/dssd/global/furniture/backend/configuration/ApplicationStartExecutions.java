@@ -1,5 +1,7 @@
 package dssd.global.furniture.backend.configuration;
 
+import java.util.Arrays;
+
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
@@ -17,10 +19,16 @@ import org.bonitasoft.engine.session.APISession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
+import dssd.global.furniture.backend.filters.AuthFilter;
 import dssd.global.furniture.backend.services.BonitaService;
 
 
@@ -45,6 +53,31 @@ public class ApplicationStartExecutions implements ApplicationRunner {
 		this.bonitaService.getLast100DeployedProcess().getResult().toString() + " SIZE: " +this.bonitaService.getLast100DeployedProcess().getCount() );
 		
 	}
+	
+	@Bean
+	public FilterRegistrationBean<AuthFilter> loggingFilter(){
+	    FilterRegistrationBean<AuthFilter> registrationBean 
+	      = new FilterRegistrationBean<>();
+	        
+	    registrationBean.setFilter(new AuthFilter());
+	    registrationBean.addUrlPatterns("/api/*");
+	        
+	    return registrationBean;    
+	}
+	
+	@Bean
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:4200");
+        config.setAllowedMethods(Arrays.asList("POST", "OPTIONS", "GET", "DELETE", "PUT"));
+        config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
+        source.registerCorsConfiguration("/**", config);
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
+    }
 	
 
 	    
