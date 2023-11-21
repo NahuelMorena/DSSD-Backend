@@ -16,6 +16,7 @@ import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 @Controller
 public class AuthController {
 	
@@ -32,7 +33,10 @@ public class AuthController {
 		HttpHeaders httpHeaders = new HttpHeaders();
 	    httpHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 		if(isValid) {
-			this.bonitaService.login(loginRequest);
+			HttpSession session=request.getSession();
+			if(session.isNew()) {
+				session.setAttribute("username",loginRequest.getUsername());
+			}
 		    return new ResponseEntity<String>("Credenciales válidas", httpHeaders, HttpStatus.SC_OK);
 		}else {
 			return new ResponseEntity<String>("Credenciales inválidas", httpHeaders, HttpStatus.SC_BAD_REQUEST);
@@ -40,15 +44,12 @@ public class AuthController {
 	}
 	
 	@GetMapping("/logout")
-	public ResponseEntity<String> logout(){
-		boolean ok=this.bonitaService.logout();
+	public ResponseEntity<String> logout(HttpServletRequest request){
+		HttpSession session=request.getSession(false);
+		session.invalidate();
 		HttpHeaders httpHeaders = new HttpHeaders();
 	    httpHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
-		if(ok) {
-			 return new ResponseEntity<String>("Sesión cerrada exitosamente", httpHeaders, HttpStatus.SC_OK);
-		}else {
-			return new ResponseEntity<String>("Error al cerrar sesión", httpHeaders, HttpStatus.SC_BAD_REQUEST);
-		}
+	    return new ResponseEntity<String>("Sesión cerrada exitosamente", httpHeaders, HttpStatus.SC_OK);
 	}
 	
 	

@@ -3,7 +3,10 @@ package dssd.global.furniture.backend.controllers;
 import dssd.global.furniture.backend.model.Material;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.UserServiceImplementation;
 import dssd.global.furniture.backend.services.interfaces.MaterialService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +23,19 @@ public class MaterialController {
 
     @Autowired
     private MaterialService materialService;
+
     
     @Autowired
-    private BonitaService bonitaService;
+    private UserServiceImplementation userService;
 
     private final String baseUrl = "/api/materials";
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @GetMapping(baseUrl + "/get-materials")
-    public HttpEntity<List<Material>> getMaterials(){
-		if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+    public HttpEntity<List<Material>> getMaterials(HttpServletRequest req){
+		HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
         return ResponseEntity.ok(this.materialService.getAllMaterials());

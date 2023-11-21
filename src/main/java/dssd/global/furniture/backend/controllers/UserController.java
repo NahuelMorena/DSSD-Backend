@@ -12,17 +12,16 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class UserController {
-	@Autowired
-	private UserServiceImplementation userService;
 	
 	@Autowired
-	private BonitaService bonitaService;
+	private UserServiceImplementation userService;
 	
 	private final String url="/api/users";
 	
 	@GetMapping(url+"/getRolSession")
-	public ResponseEntity<String> getRolSession(){
-		String username=this.bonitaService.getUsernameCurrentUser();
+	public ResponseEntity<String> getRolSession(HttpServletRequest req){
+		HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
 		String rol=this.userService.getRole(username).name();
 		return ResponseEntity.ok(rol);	
 	}

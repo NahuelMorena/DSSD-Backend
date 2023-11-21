@@ -13,12 +13,17 @@ import dssd.global.furniture.backend.controllers.dtos.TaskStablishMaterialsDTO;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class BonitaController {
 	
 	@Autowired
 	BonitaService bonitaService;
+	
+	@Autowired
+	UserServiceImplementation userService;
 	
 	
 	private final APIClient bonitaAPIClient;
@@ -30,8 +35,10 @@ public class BonitaController {
 	private final String url="/api/bonita";
 	
 	@GetMapping(url+"/getTasksStablishMaterials")
-	public ResponseEntity<List<TaskStablishMaterialsDTO>> getAllStablishMaterials() {
-		if(! this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+	public ResponseEntity<List<TaskStablishMaterialsDTO>> getAllStablishMaterials( HttpServletRequest request) {
+		HttpSession session=request.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
 		List<TaskStablishMaterialsDTO> l=this.bonitaService.getAllStablishMaterials();

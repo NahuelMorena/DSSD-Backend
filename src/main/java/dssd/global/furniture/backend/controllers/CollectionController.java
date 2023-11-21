@@ -15,11 +15,15 @@ import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.model.Store;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.UserServiceImplementation;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
 
 import dssd.global.furniture.backend.services.interfaces.DistributionOrderService;
 import dssd.global.furniture.backend.services.interfaces.StoreService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
@@ -54,6 +58,8 @@ public class CollectionController {
 	private CloudApiService cloudApiService;
 	@Autowired
 	private DistributionOrderService distributionOrderService;
+	@Autowired
+	private UserServiceImplementation userService;
 
 	@Autowired
 	private StoreService storeService;
@@ -69,8 +75,10 @@ public class CollectionController {
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @PostMapping(baseUrl + "/create-collection")
-    public ResponseEntity<Collection> createCollection(@RequestBody CollectionDTO request) {
-    	if(!this.bonitaService.currentUserCanAccess(Rol.CREATIVE)) {
+    public ResponseEntity<Collection> createCollection(@RequestBody CollectionDTO request,HttpServletRequest req) {
+    	HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.CREATIVE)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
     	Collection newCollection=null;
@@ -94,8 +102,10 @@ public class CollectionController {
     
     @CrossOrigin(origins="http://localhost:4200",allowCredentials="true")
     @PostMapping(value=baseUrl + "/establishMaterials")
-    public ResponseEntity<String> establishMaterials(@RequestBody MaterialRequestDTO request){
-    	if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+    public ResponseEntity<String> establishMaterials(@RequestBody MaterialRequestDTO request,HttpServletRequest req){
+    	HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.CREATIVE)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
     	HttpHeaders httpHeaders = new HttpHeaders();
@@ -114,8 +124,10 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/search-material-offers")
-	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
-		if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request,HttpServletRequest req) {
+		HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
 		List<OffersByApiDTO> offerts = new ArrayList<>();
@@ -134,8 +146,10 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/reserve-materials")
-	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@RequestBody OffersToReserveDTO request){
-		if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@RequestBody OffersToReserveDTO request,HttpServletRequest req){
+		HttpSession session=req.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
 		List<ReserveByApiDTO> reserves = new ArrayList<>();
