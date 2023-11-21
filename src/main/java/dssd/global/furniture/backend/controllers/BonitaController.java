@@ -1,10 +1,8 @@
 package dssd.global.furniture.backend.controllers;
 
-import java.security.PublicKey;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import java.util.List;
+import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.api.APIClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +32,11 @@ public class BonitaController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@GetMapping(url+"/getTasksStablishMaterials")
 	public ResponseEntity<List<TaskStablishMaterialsDTO>> getAllStablishMaterials() {
-		List<TaskStablishMaterialsDTO> l=this.bonitaService.getAllStablishMaterials();
-		return ResponseEntity.ok(l);
+		if(this.bonitaService.isLogged()) {
+			List<TaskStablishMaterialsDTO> l=this.bonitaService.getAllStablishMaterials();
+			return ResponseEntity.ok(l);
+		}
+		return new ResponseEntity("Usuario no autenticado",null, HttpStatus.SC_UNAUTHORIZED);
 	}
 	
 	

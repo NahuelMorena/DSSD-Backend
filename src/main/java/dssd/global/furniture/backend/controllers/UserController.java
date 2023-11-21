@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -14,13 +15,15 @@ public class UserController {
 	@Autowired
 	private UserServiceImplementation userService;
 	
+	@Autowired
+	private BonitaService bonitaService;
+	
 	private final String url="/api/users";
 	
 	@GetMapping(url+"/getRolSession")
-	public ResponseEntity<String> getRolSession( HttpServletRequest request ){
-		HttpSession session=request.getSession(false);
-		String username=(String)session.getAttribute("username");
-		String rol=userService.getRole(username);
+	public ResponseEntity<String> getRolSession(){
+		String username=this.bonitaService.getUsernameCurrentUser();
+		String rol=this.userService.getRole(username);
 		return ResponseEntity.ok(rol);	
 	}
 }

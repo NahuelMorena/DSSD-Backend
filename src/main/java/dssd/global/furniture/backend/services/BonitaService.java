@@ -21,7 +21,9 @@ import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
+import org.bonitasoft.engine.api.LoginAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
+import org.bonitasoft.engine.api.TenantAPIAccessor;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
 import org.bonitasoft.engine.bpm.data.DataInstance;
 import org.bonitasoft.engine.bpm.data.impl.DataDefinitionImpl;
@@ -86,7 +88,7 @@ public class BonitaService {
 		try {
 			this.apiClient.logout();
 			return true;
-		} catch (LogoutException e) {
+		} catch (LogoutException | IllegalStateException e) {
 			return false;
 		}
 	}
@@ -94,13 +96,14 @@ public class BonitaService {
 	public boolean login(LoginRequest lr) {
 		try {
 			apiClient.login(lr.getUsername(),lr.getPassword());
-			System.out.println("El usuario con sesión iniciada es: "+this.getSession().getUserName());
 			return true;
 		} catch (InaccessibleObjectException | LoginException e) {
 			return false;
 		}
-		
+	}
 	
+	public boolean isLogged() {
+		return this.apiClient.getSession()!=null;
 	}
 	
 	public IdentityAPI getIdentityAPI() {
@@ -126,6 +129,10 @@ public class BonitaService {
 			System.out.println("NO SE ENCONTRO EL USUARIO " + apiClient.getSession().getUserName());
 			return null;
 		}
+	}
+	
+	public String getUsernameCurrentUser() {
+		return this.getCurrentLoggedInUser().getUserName();
 	}
 	
 	
