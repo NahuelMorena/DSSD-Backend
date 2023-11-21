@@ -12,6 +12,7 @@ import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRe
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.DistributionOrders;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
+import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.model.Store;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
@@ -69,6 +70,9 @@ public class CollectionController {
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @PostMapping(baseUrl + "/create-collection")
     public ResponseEntity<Collection> createCollection(@RequestBody CollectionDTO request) {
+    	if(!this.bonitaService.currentUserCanAccess(Rol.CREATIVE)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
     	Collection newCollection=null;
     	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null && request.getEstimated_release_date()!=null){
     			newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
@@ -91,6 +95,9 @@ public class CollectionController {
     @CrossOrigin(origins="http://localhost:4200",allowCredentials="true")
     @PostMapping(value=baseUrl + "/establishMaterials")
     public ResponseEntity<String> establishMaterials(@RequestBody MaterialRequestDTO request){
+    	if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
     	HttpHeaders httpHeaders = new HttpHeaders();
 	    httpHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
     	Optional<Collection> collection=this.collectionService.getCollectionByID(request.getCollection_id());
@@ -108,6 +115,9 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/search-material-offers")
 	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request) {
+		if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
 		List<OffersByApiDTO> offerts = new ArrayList<>();
 		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
 		if (collection.isPresent()){
@@ -125,6 +135,9 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/reserve-materials")
 	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@RequestBody OffersToReserveDTO request){
+		if(!this.bonitaService.currentUserCanAccess(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
 		List<ReserveByApiDTO> reserves = new ArrayList<>();
 		for (OffersToReserveDTO.Offer offer : request.getOffers()){
 			reserves.add(cloudApiService.reserveMaterials(offer));

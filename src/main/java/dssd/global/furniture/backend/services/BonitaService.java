@@ -15,21 +15,13 @@ import dssd.global.furniture.backend.controllers.dtos.TaskStablishMaterialsDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
 import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
 import dssd.global.furniture.backend.model.Collection;
+import dssd.global.furniture.backend.model.Rol;
 
-import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.api.APIClient;
-import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
-import org.bonitasoft.engine.api.LoginAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
-import org.bonitasoft.engine.api.TenantAPIAccessor;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
-import org.bonitasoft.engine.bpm.data.DataInstance;
-import org.bonitasoft.engine.bpm.data.impl.DataDefinitionImpl;
-import org.bonitasoft.engine.bpm.data.impl.DataInstanceImpl;
-import org.bonitasoft.engine.bpm.flownode.ActivityDefinitionNotFoundException;
-import org.bonitasoft.engine.bpm.flownode.ActivityInstanceNotFoundException;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
 import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
@@ -64,12 +56,8 @@ import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchOptionsBuilder;
 import org.bonitasoft.engine.search.SearchResult;
 import org.bonitasoft.engine.session.APISession;
-import org.bonitasoft.engine.util.APITypeManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import dssd.global.furniture.backend.utils.Constantes;
 @Service
@@ -83,6 +71,9 @@ public class BonitaService {
 	
 	@Autowired 
 	CollectionServiceImplementation collectionService;
+	
+	@Autowired
+	UserServiceImplementation userService;
 	
 	public boolean logout() {
 		try {
@@ -105,6 +96,16 @@ public class BonitaService {
 	public boolean isLogged() {
 		return this.apiClient.getSession()!=null;
 	}
+	
+	
+	public boolean currentUserCanAccess(Rol rol) {
+		String username=this.getCurrentLoggedInUser().getUserName();
+		System.out.println("Usuario que hace la consulta "+username);
+		return this.userService.getRole(username).equals(rol);
+	}
+
+	
+	
 	
 	public IdentityAPI getIdentityAPI() {
 		return this.apiClient.getIdentityAPI();
@@ -134,7 +135,6 @@ public class BonitaService {
 	public String getUsernameCurrentUser() {
 		return this.getCurrentLoggedInUser().getUserName();
 	}
-	
 	
 	public long getProcessDefinitionId​(String name, String version) {
 		try {

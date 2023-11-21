@@ -16,31 +16,6 @@ import dssd.global.furniture.backend.services.BonitaService;
 
 
 @Configuration
-
-public class ApplicationStartExecutions implements ApplicationRunner {
-	@Autowired
-	BonitaService bonitaService;
-
-	@Override
-	public void run(ApplicationArguments args) throws Exception {
-		
-	}
-	
-	
-	@Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:4200");
-        config.setAllowedMethods(Arrays.asList("POST", "OPTIONS", "GET", "DELETE", "PUT"));
-        config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-        source.registerCorsConfiguration("/**", config);
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
-    }
-
-
-	    
+public class ApplicationStartExecutions {
+    
 }

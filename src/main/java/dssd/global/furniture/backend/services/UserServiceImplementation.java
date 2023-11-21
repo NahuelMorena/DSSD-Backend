@@ -26,12 +26,12 @@ public class UserServiceImplementation implements UserService {
    }
 
    @Override
-	public String getRole(String username) {
+	public Rol getRole(String username) {
 	   User u=this.userRepository.findByUsername(username);
 	   if(u!=null) {
-		   return u.getRol().name();
+		   return u.getRol();
 	   }else {
-		   return "";
+		   return null;
 	   }
 }
 }

@@ -23,7 +23,7 @@ public class UserController {
 	@GetMapping(url+"/getRolSession")
 	public ResponseEntity<String> getRolSession(){
 		String username=this.bonitaService.getUsernameCurrentUser();
-		String rol=this.userService.getRole(username);
+		String rol=this.userService.getRole(username).name();
 		return ResponseEntity.ok(rol);	
 	}
 }
