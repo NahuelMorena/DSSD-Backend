@@ -5,7 +5,6 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
-import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OrdersRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
@@ -97,7 +96,6 @@ public class CollectionController {
 			return ResponseEntity.badRequest().build();
 		}
     	return ResponseEntity.ok(newCollection);
-    	
     }
     
     @CrossOrigin(origins="http://localhost:4200",allowCredentials="true")
@@ -113,6 +111,7 @@ public class CollectionController {
     	Optional<Collection> collection=this.collectionService.getCollectionByID(request.getCollection_id());
     	if(collection.isPresent()) {
         	collectionService.createMaterialInCollection(collection.get(),request.getMaterials());
+			bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Establecer materiales");
         	return new ResponseEntity<String>("Materiales establecidos exitosamente", httpHeaders, HttpStatus.SC_OK);
     	}else {
     		return new ResponseEntity<String>("Error al establecer materiales de la colección", httpHeaders, HttpStatus.SC_BAD_REQUEST);

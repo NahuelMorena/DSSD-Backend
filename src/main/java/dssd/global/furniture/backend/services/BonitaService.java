@@ -159,35 +159,52 @@ public class BonitaService {
 	}
 	
 	public void assignTaskToUser(Long processInstanceId, Collection collection){
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Planificar colección");
+		if(humanTask!=null) {
+			Map<String, Serializable> taskVariables = new HashMap<>();
+			taskVariables.put("id_collection", collection.getID());
+			taskVariables.put("date_start_manufacture", Date.from(collection.getDate_start_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			this.executeUserTask(humanTask, taskVariables);
+		}
+	}
+
+	public void nextBonitaTask(Long processInstanceId, String nameTask){
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, nameTask);
+		if (humanTask != null){
+			this.executeUserTask(humanTask, null);
+		} else {
+			System.out.println("No encontro instancia de tarea humana");
+		}
+	}
+
+	private void executeUserTask(HumanTaskInstance humanTask, Map<String, Serializable> taskVariables){
+		try {
+			this.getProcessAPI().assignUserTask(humanTask.getId(),this.getCurrentLoggedInUser().getId());
+			if (taskVariables != null){
+				this.getProcessAPI().updateActivityInstanceVariables(humanTask.getId(),taskVariables);
+			}
+			this.getProcessAPI().executeUserTask(humanTask.getId(),null);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	private HumanTaskInstance getHumanTaskInstance(Long processInstanceId, String nameTask){
 		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 30, null);
-		HumanTaskInstance ultimaTareaPendienteCasoActual=null;
-		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
-	        HumanTaskInstance item = i.next();
-			if(processInstanceId.equals(item.getParentProcessInstanceId())) {
-				ultimaTareaPendienteCasoActual=item;
+		HumanTaskInstance humantask = null;
+		for (HumanTaskInstance item:  pendingTasks){
+			if (processInstanceId.equals(item.getParentProcessInstanceId()) &&
+					item.getName().equals(nameTask)
+			) {
+				humantask = item;
 				break;
 			}
 		}
-		if(ultimaTareaPendienteCasoActual!=null) {
-			try {
-				this.getProcessAPI().assignUserTask(ultimaTareaPendienteCasoActual.getId(),this.getCurrentLoggedInUser().getId());
-				try {
-					Map<String, Serializable> taskVariables = new HashMap<>();
-					taskVariables.put("id_collection", collection.getID());
-					taskVariables.put("date_start_manufacture", Date.from(collection.getDate_start_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-					taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-					taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-					this.getProcessAPI().updateActivityInstanceVariables(ultimaTareaPendienteCasoActual.getId(),taskVariables);
-					this.getProcessAPI().executeUserTask(ultimaTareaPendienteCasoActual.getId(),null);
-				} catch (UserTaskNotFoundException | FlowNodeExecutionException | ContractViolationException e) {
-					e.printStackTrace();
-				}
-			} catch (UpdateException e) {
-				e.printStackTrace();
-			}
-		}
+		return humantask;
 	}
-	
+
 	public List<TaskStablishMaterialsDTO> getAllStablishMaterials() {
 		if(! this.bonitaApiService.isAuthenticated()) {
 			this.bonitaApiService.login();
