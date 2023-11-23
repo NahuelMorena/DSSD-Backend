@@ -105,7 +105,7 @@ public class CollectionController {
     public ResponseEntity<String> establishMaterials(@RequestBody MaterialRequestDTO request,HttpServletRequest req){
     	HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
-		if(! userService.getRole(username).equals(Rol.CREATIVE)) {
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
     	HttpHeaders httpHeaders = new HttpHeaders();
