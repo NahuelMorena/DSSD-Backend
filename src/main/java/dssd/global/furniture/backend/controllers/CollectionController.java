@@ -43,6 +43,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,11 @@ public class CollectionController {
 		List<CollectionDTO> collectionDTOs = this.convertToDTOs(collections);
         return ResponseEntity.ok(collectionDTOs);
     }
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/get-collection")
+	public ResponseEntity<Optional<Collection>> getCollectionById(@RequestBody Map<String, Long> request) {
+		return ResponseEntity.ok(this.collectionService.getCollectionByID(request.get("id")));
+	}
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @PostMapping(baseUrl + "/create-collection")
@@ -171,6 +177,7 @@ public class CollectionController {
 							.orElseThrow(() -> new RuntimeException("La tienda no se encontro"));
 			orders.add(distributionOrderService.setDistributionOrder(store, collection, order.getQuantity()));
 		}
+		bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Planificar ordenes de distribución");
 		return ResponseEntity.ok(orders);
 	}
 

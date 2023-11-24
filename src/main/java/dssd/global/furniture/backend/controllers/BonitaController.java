@@ -45,6 +45,14 @@ public class BonitaController {
 		return ResponseEntity.ok(l);
 	}
 	
-	
-	
+	@GetMapping(url+"/planDistributionOrders")
+	public ResponseEntity<List<TaskDTO>> getAllPlanDistributionOrders(HttpServletRequest request){
+		HttpSession session = request.getSession(false);
+		String username = (String) session.getAttribute("username");
+		if (! userService.getRole(username).equals(Rol.COMMERCIAL)) {
+			return new ResponseEntity("No se permiten las acciones", null, HttpStatus.SC_FORBIDDEN);
+		}
+		List<TaskDTO> tasks = this.bonitaService.getAllTaskByName("Planificar ordenes de distribución");
+		return ResponseEntity.ok(tasks);
+	}
 }
