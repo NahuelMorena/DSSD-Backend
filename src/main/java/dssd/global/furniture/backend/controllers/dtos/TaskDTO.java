@@ -2,7 +2,7 @@ package dssd.global.furniture.backend.controllers.dtos;
 
 import java.time.LocalDate;
 
-public class TaskStablishMaterialsDTO {
+public class TaskDTO {
 	private long id;
 	private long idCase;
 	private String name;
@@ -13,7 +13,7 @@ public class TaskStablishMaterialsDTO {
     
     
     
-	public TaskStablishMaterialsDTO(long id, long idCase,String name, long idCollection, LocalDate date_start_manufacture,
+	public TaskDTO(long id, long idCase,String name, long idCollection, LocalDate date_start_manufacture,
 			LocalDate date_end_manufacture, LocalDate estimated_release_date) {
 		this.id = id;
 		this.idCase = idCase;

@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import dssd.global.furniture.backend.controllers.dtos.TaskStablishMaterialsDTO;
+import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
 import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
 import dssd.global.furniture.backend.model.Collection;
@@ -174,27 +174,27 @@ public class BonitaService {
 		return humantask;
 	}
 
-	public List<TaskStablishMaterialsDTO> getAllStablishMaterials() {
+	public List<TaskDTO> getAllTaskByName(String nameTask) {
 		if(! this.bonitaApiService.isAuthenticated()) {
 			this.bonitaApiService.login();
 		}
 		List<HumanTaskInstance> pendingTasks = this.getProcessAPI().getPendingHumanTaskInstances(this.getCurrentLoggedInUser().getId(), 0, 100, null);
-		List<TaskStablishMaterialsDTO> listStablishMaterials=new ArrayList<TaskStablishMaterialsDTO>();
+		List<TaskDTO> list=new ArrayList<TaskDTO>();
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
 	        HumanTaskInstance item = i.next();
-			if(item.getName().equals("Establecer materiales")) {
+			if(item.getName().equals(nameTask)) {
 				String idCase=String.valueOf(item.getParentProcessInstanceId());
 				VariableBonita vb=this.bonitaApiService.getIdCollectionCase(idCase);
 				Optional<Collection> c=this.collectionService.getCollectionByID(Long.valueOf(vb.getValue()));
 				if(c.isPresent()) {
 					Collection collection=c.get();
-					TaskStablishMaterialsDTO ts=new TaskStablishMaterialsDTO(item.getId(),item.getParentProcessInstanceId(),item.getName(),collection.getID()
+					TaskDTO ts=new TaskDTO(item.getId(),item.getParentProcessInstanceId(),item.getName(),collection.getID()
 					, collection.getDate_start_manufacture(),collection.getDate_end_manufacture(), collection.getEstimated_release_date());
-					listStablishMaterials.add(ts);
+					list.add(ts);
 				}
 			}
 		}
-		return listStablishMaterials;
+		return list;
 	}
 	
 
