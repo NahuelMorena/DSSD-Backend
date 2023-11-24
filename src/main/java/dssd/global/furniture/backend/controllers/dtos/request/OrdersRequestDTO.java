@@ -6,6 +6,8 @@ public class OrdersRequestDTO {
     private Long collection_id;
     private List<OrderRequest> orders;
 
+    private Long process_instance_id;
+
     public static class OrderRequest {
         private Long id_store;
         private Integer quantity;
@@ -41,5 +43,13 @@ public class OrdersRequestDTO {
 
     public void setOrders(List<OrderRequest> orders) {
         this.orders = orders;
+    }
+
+    public Long getProcess_instance_id() {
+        return process_instance_id;
+    }
+
+    public void setProcess_instance_id(Long process_instance_id) {
+        this.process_instance_id = process_instance_id;
     }
 }

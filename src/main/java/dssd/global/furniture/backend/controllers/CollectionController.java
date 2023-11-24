@@ -5,7 +5,6 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
-import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO.MaterialRequest;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OrdersRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
@@ -44,6 +43,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -72,6 +72,11 @@ public class CollectionController {
 		List<CollectionDTO> collectionDTOs = this.convertToDTOs(collections);
         return ResponseEntity.ok(collectionDTOs);
     }
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/get-collection")
+	public ResponseEntity<Optional<Collection>> getCollectionById(@RequestBody Map<String, Long> request) {
+		return ResponseEntity.ok(this.collectionService.getCollectionByID(request.get("id")));
+	}
 
     @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
     @PostMapping(baseUrl + "/create-collection")
@@ -82,7 +87,9 @@ public class CollectionController {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
     	Collection newCollection=null;
-    	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null && request.getEstimated_release_date()!=null){
+    	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null
+    			&& request.getEstimated_release_date()!=null && request.getUnits()!=null && request.getUnits()>0
+    			&& request.getDate_start_manufacture().isBefore(request.getDate_end_manufacture()) && request.getDate_end_manufacture().isBefore(request.getEstimated_release_date())){
     			newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
     			request.getEstimated_release_date(), request.getFurnitures(), request.getUnits());
     	}else {
@@ -97,7 +104,6 @@ public class CollectionController {
 			return ResponseEntity.badRequest().build();
 		}
     	return ResponseEntity.ok(newCollection);
-    	
     }
     
     @CrossOrigin(origins="http://localhost:4200",allowCredentials="true")
@@ -113,6 +119,7 @@ public class CollectionController {
     	Optional<Collection> collection=this.collectionService.getCollectionByID(request.getCollection_id());
     	if(collection.isPresent()) {
         	collectionService.createMaterialInCollection(collection.get(),request.getMaterials());
+			bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Establecer materiales");
         	return new ResponseEntity<String>("Materiales establecidos exitosamente", httpHeaders, HttpStatus.SC_OK);
     	}else {
     		return new ResponseEntity<String>("Error al establecer materiales de la colección", httpHeaders, HttpStatus.SC_BAD_REQUEST);
@@ -170,6 +177,7 @@ public class CollectionController {
 							.orElseThrow(() -> new RuntimeException("La tienda no se encontro"));
 			orders.add(distributionOrderService.setDistributionOrder(store, collection, order.getQuantity()));
 		}
+		bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Planificar ordenes de distribución");
 		return ResponseEntity.ok(orders);
 	}
 
