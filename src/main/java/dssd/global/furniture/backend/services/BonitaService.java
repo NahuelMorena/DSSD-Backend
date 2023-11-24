@@ -77,37 +77,6 @@ public class BonitaService {
 	@Autowired
 	UserServiceImplementation userService;
 	
-	public boolean logout() {
-		try {
-			this.apiClient.logout();
-			return true;
-		} catch (LogoutException | IllegalStateException e) {
-			return false;
-		}
-	}
-	
-	public boolean login(LoginRequest lr) {
-		try {
-			apiClient.login(lr.getUsername(),lr.getPassword());
-			return true;
-		} catch (InaccessibleObjectException | LoginException e) {
-			return false;
-		}
-	}
-	
-	public boolean isLogged() {
-		return this.apiClient.getSession()!=null;
-	}
-	
-	
-	public boolean currentUserCanAccess(Rol rol) {
-		String username=this.getCurrentLoggedInUser().getUserName();
-		System.out.println("Usuario que hace la consulta "+username);
-		return this.userService.getRole(username).equals(rol);
-	}
-
-	
-	
 	
 	public IdentityAPI getIdentityAPI() {
 		return this.apiClient.getIdentityAPI();
@@ -235,9 +204,7 @@ public class BonitaService {
 				this.getProcessDefinitionId​("Proceso de planificación de colección de muebles", "2.0"));
 		System.out.println(
 				"ID DEL PROCESO: " + processDefinition.getId() + " NOMBRE DEL PROCESO" + processDefinition.getName());
-
-		//start the process. Tras hacer esto en el localhost de bonita en la pestaña de "cases" deberia aparecer uno nuevo.
-		final ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
+		ProcessInstance processInstance = this.getProcessAPI().startProcess(processDefinition.getId());
 	    System.out.println("A new process instance was started with id: " + processInstance.getId());
 	    return processInstance.getId();
 	}
@@ -259,8 +226,6 @@ public class BonitaService {
 				.toString();
 		System.out.println("Lista: " + s);
 
-		//apiClient.getProcessAPI().assignAndExecuteUserTask(userId, getProcess, null);
-		//this.getProcessAPI().executeUserTask(userId, taskInstanceId, null);
 	}
 
 

@@ -81,7 +81,9 @@ public class CollectionController {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
     	Collection newCollection=null;
-    	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null && request.getEstimated_release_date()!=null){
+    	if(request.getFurnitures().size()>0 && request.getDate_end_manufacture()!=null && request.getDate_start_manufacture()!=null
+    			&& request.getEstimated_release_date()!=null && request.getUnits()!=null && request.getUnits()>0
+    			&& request.getDate_start_manufacture().isBefore(request.getDate_end_manufacture()) && request.getDate_end_manufacture().isBefore(request.getEstimated_release_date())){
     			newCollection=this.collectionService.createCollection(request.getDate_start_manufacture(),request.getDate_end_manufacture(),
     			request.getEstimated_release_date(), request.getFurnitures(), request.getUnits());
     	}else {

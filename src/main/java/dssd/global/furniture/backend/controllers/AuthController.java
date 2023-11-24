@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
-import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -23,9 +22,6 @@ public class AuthController {
 	
 	@Autowired
 	private UserServiceImplementation userService;
-	
-	@Autowired
-	private BonitaService bonitaService;
 
 	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request ){
@@ -39,7 +35,7 @@ public class AuthController {
 			}
 		    return new ResponseEntity<String>("Credenciales válidas", httpHeaders, HttpStatus.SC_OK);
 		}else {
-			return new ResponseEntity<String>("Credenciales inválidas", httpHeaders, HttpStatus.SC_BAD_REQUEST);
+			return new ResponseEntity<String>("Credenciales inválidas", httpHeaders, HttpStatus.SC_UNAUTHORIZED);
 		}
 	}
 	
