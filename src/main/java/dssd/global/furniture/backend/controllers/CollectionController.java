@@ -11,9 +11,11 @@ import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRe
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.DistributionOrders;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
+import dssd.global.furniture.backend.model.MaterialInCollection;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.model.Store;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.MaterialInCollectionServiceImpl;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import dssd.global.furniture.backend.services.interfaces.CollectionService;
@@ -35,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -59,6 +62,8 @@ public class CollectionController {
 	private DistributionOrderService distributionOrderService;
 	@Autowired
 	private UserServiceImplementation userService;
+	@Autowired
+	private MaterialInCollectionServiceImpl materialCollService;
 
 	@Autowired
 	private StoreService storeService;
@@ -124,22 +129,25 @@ public class CollectionController {
     }
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-	@PostMapping(baseUrl + "/search-material-offers")
-	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request,HttpServletRequest req) {
+	@GetMapping(baseUrl + "/search-material-offers/{collectionId}")
+	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@PathVariable Long collectionId,HttpServletRequest req) {
 		HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
 		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
 		List<OffersByApiDTO> offerts = new ArrayList<>();
-		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
+		Optional<Collection> collection = this.collectionService.getCollectionByID(collectionId);
 		if (collection.isPresent()){
+			if(! this.cloudApiService.isLogged()) {
+				this.cloudApiService.authenticate();
+			}
 			LocalDate date = collection.get().getDate_start_manufacture();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 			String formattedDate = date.format(formatter);
-
-			for (MaterialRequestDTO.MaterialRequest material : request.getMaterials()) {
-				offerts.addAll(cloudApiService.getOffersByMaterial(material.getName(), formattedDate));
+			List<MaterialInCollection> listMatInCol=this.materialCollService.getMaterialsInCollection(collectionId);
+			for (MaterialInCollection material :listMatInCol) {
+				offerts.addAll(cloudApiService.getOffersByMaterial(material.getMaterial().getName(), formattedDate));
 			}
 		}
 		return ResponseEntity.ok(offerts);

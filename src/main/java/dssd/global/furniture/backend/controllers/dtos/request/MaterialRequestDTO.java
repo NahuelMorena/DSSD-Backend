@@ -10,8 +10,13 @@ public class MaterialRequestDTO {
     public static class MaterialRequest {
         private String name;
         private Integer quantity;
+        
+        public MaterialRequest(String name, Integer quantity) {
+			this.name = name;
+			this.quantity = quantity;
+		}
 
-        public String getName() {
+		public String getName() {
             return name;
         }
 

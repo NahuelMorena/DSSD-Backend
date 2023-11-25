@@ -182,6 +182,7 @@ public class BonitaService {
 		List<TaskDTO> list=new ArrayList<TaskDTO>();
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
 	        HumanTaskInstance item = i.next();
+	        System.out.println(item.getName());
 			if(item.getName().equals(nameTask)) {
 				String idCase=String.valueOf(item.getParentProcessInstanceId());
 				VariableBonita vb=this.bonitaApiService.getIdCollectionCase(idCase);

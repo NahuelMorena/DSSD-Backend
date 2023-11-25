@@ -34,6 +34,10 @@ public class CloudApiServiceImplementation implements CloudApiService {
             throw new RuntimeException("Token de autenticación no disponible");
         }
     }
+    
+    public boolean isLogged() {
+    	return ! (this.authToken==null);
+    }
 
     private HttpEntity<String> assembleHeader(String jsonBody){
         HttpHeaders headers = new HttpHeaders();

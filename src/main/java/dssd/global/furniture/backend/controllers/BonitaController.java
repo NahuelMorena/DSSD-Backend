@@ -45,6 +45,17 @@ public class BonitaController {
 		return ResponseEntity.ok(l);
 	}
 	
+	@GetMapping(url + "/getTasksQueryApi")
+	public ResponseEntity<List<TaskDTO>> getAllQueryApi(HttpServletRequest request){
+		HttpSession session=request.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
+		List<TaskDTO> l=this.bonitaService.getAllTaskByName("Consultar API en busqueda de materiales necesarios");
+		return ResponseEntity.ok(l);
+	}
+	
 	
 	
 }
