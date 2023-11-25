@@ -23,7 +23,6 @@ public class Collection {
     private Set<FurnitureInCollection> furnitures;
 
     @OneToMany(mappedBy = "collection")
-    @JsonManagedReference
     private Set<MaterialInCollection> materials;
 
     private LocalDate date_start_manufacture;

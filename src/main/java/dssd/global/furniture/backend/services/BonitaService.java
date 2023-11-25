@@ -139,6 +139,14 @@ public class BonitaService {
 		}
 	}
 
+	public void nextTaskAPIQuery(Long processInstanceId) {
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Consultar API en busqueda de materiales necesarios");
+		if(humanTask!=null) {
+			Map<String,Serializable> taskVariables=new HashMap<>();
+			taskVariables.put("supplier_for_each_material", true);
+			this.executeUserTask(humanTask, taskVariables);
+		}
+	}
 	public void nextBonitaTask(Long processInstanceId, String nameTask){
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, nameTask);
 		if (humanTask != null){

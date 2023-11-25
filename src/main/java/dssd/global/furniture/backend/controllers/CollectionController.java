@@ -30,6 +30,7 @@ import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -40,11 +41,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,7 +69,6 @@ public class CollectionController {
 	private UserServiceImplementation userService;
 	@Autowired
 	private MaterialInCollectionServiceImpl materialCollService;
-
 	@Autowired
 	private StoreService storeService;
 
@@ -130,7 +134,8 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@GetMapping(baseUrl + "/search-material-offers/{collectionId}")
-	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@PathVariable Long collectionId,HttpServletRequest req) {
+	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@PathVariable Long collectionId,
+			@RequestParam(name = "dateStart", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date dateForm	,HttpServletRequest req) {
 		HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
 		if(! userService.getRole(username).equals(Rol.OPERATION)) {
@@ -143,8 +148,11 @@ public class CollectionController {
 				this.cloudApiService.authenticate();
 			}
 			LocalDate date = collection.get().getDate_start_manufacture();
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-			String formattedDate = date.format(formatter);
+			if(! dateForm.before(Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()))&&(dateForm.after(new Date()))) {
+				return new ResponseEntity("La fecha ingresada no es antes que la fecha de inicio de fabricación o después de la de hoy",null,HttpStatus.SC_BAD_REQUEST);
+			}
+			SimpleDateFormat formatter=new SimpleDateFormat("dd-MM-yyyy");
+			String formattedDate = formatter.format(dateForm);
 			List<MaterialInCollection> listMatInCol=this.materialCollService.getMaterialsInCollection(collectionId);
 			for (MaterialInCollection material :listMatInCol) {
 				offerts.addAll(cloudApiService.getOffersByMaterial(material.getMaterial().getName(), formattedDate));

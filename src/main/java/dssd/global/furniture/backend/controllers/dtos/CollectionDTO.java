@@ -3,6 +3,8 @@ package dssd.global.furniture.backend.controllers.dtos;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import dssd.global.furniture.backend.model.Furniture;
 import dssd.global.furniture.backend.model.Material;
 

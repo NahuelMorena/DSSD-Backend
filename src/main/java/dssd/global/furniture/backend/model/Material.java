@@ -1,5 +1,6 @@
 package dssd.global.furniture.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -18,6 +19,7 @@ public class Material {
     private String description;
 
     @OneToMany(mappedBy = "material")
+    @JsonIgnore
     private Set<MaterialInCollection> collections;
 
     public Material(){}
