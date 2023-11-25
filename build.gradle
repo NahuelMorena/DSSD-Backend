@@ -29,7 +29,8 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.bonitasoft.connectors/bonita-connectors
 	implementation 'org.bonitasoft.connectors:bonita-connectors:1.0.0'
 
-	
+	//Mails
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	
 	
 	
