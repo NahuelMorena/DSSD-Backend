@@ -13,6 +13,8 @@ public class CollectionDTO {
     private LocalDate date_end_manufacture;
     private LocalDate  estimated_release_date;
 	private Integer units;
+
+	private String mail;
     private List<Furniture> furnitures;
 	private List<Material> materials;
 
@@ -61,4 +63,12 @@ public class CollectionDTO {
 	public Integer getUnits() { return units; }
 
 	public void setUnits(Integer units) { this.units = units; }
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
 }
