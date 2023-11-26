@@ -1,7 +1,6 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
-import java.lang.reflect.InaccessibleObjectException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,9 +12,7 @@ import java.util.Iterator;
 
 import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
-import dssd.global.furniture.backend.controllers.dtos.request.LoginRequest;
 import dssd.global.furniture.backend.model.Collection;
-import dssd.global.furniture.backend.model.Rol;
 
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
@@ -33,13 +30,9 @@ import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessEnablementException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.bpm.process.ProcessInstance;
-import org.bonitasoft.engine.bpm.process.ProcessInstanceNotFoundException;
-import org.bonitasoft.engine.bpm.process.impl.DataDefinitionBuilder;
 import org.bonitasoft.engine.exception.SearchException;
-import org.bonitasoft.engine.exception.UpdateException;
 import org.bonitasoft.engine.expression.Expression;
 import org.bonitasoft.engine.expression.ExpressionBuilder;
-import org.bonitasoft.engine.expression.ExpressionEvaluationException;
 import org.bonitasoft.engine.expression.ExpressionType;
 import org.bonitasoft.engine.expression.InvalidExpressionException;
 import org.bonitasoft.engine.identity.User;
@@ -49,15 +42,12 @@ import org.bonitasoft.engine.operation.LeftOperandBuilder;
 import org.bonitasoft.engine.operation.Operation;
 import org.bonitasoft.engine.operation.OperationBuilder;
 import org.bonitasoft.engine.operation.OperatorType;
-import org.bonitasoft.engine.platform.LoginException;
-import org.bonitasoft.engine.platform.LogoutException;
 import org.bonitasoft.engine.search.Order;
 import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchOptionsBuilder;
 import org.bonitasoft.engine.search.SearchResult;
 import org.bonitasoft.engine.session.APISession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import dssd.global.furniture.backend.utils.Constantes;
@@ -127,7 +117,7 @@ public class BonitaService {
 		}
 	}
 	
-	public void assignTaskToUser(Long processInstanceId, Collection collection){
+	public void assignTaskToUser(Long processInstanceId, Collection collection, String mail){
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Planificar colección");
 		if(humanTask!=null) {
 			Map<String, Serializable> taskVariables = new HashMap<>();
@@ -135,6 +125,7 @@ public class BonitaService {
 			taskVariables.put("date_start_manufacture", Date.from(collection.getDate_start_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 			taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 			taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			taskVariables.put("email", mail);
 			this.executeUserTask(humanTask, taskVariables);
 		}
 	}

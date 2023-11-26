@@ -97,7 +97,7 @@ public class CollectionController {
     			}
     	try {
 			Long caseId=this.bonitaService.startCase();
-			this.bonitaService.assignTaskToUser(caseId, newCollection);
+			this.bonitaService.assignTaskToUser(caseId, newCollection, request.getMail());
 		} catch (ProcessDefinitionNotFoundException | ProcessActivationException | ProcessExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
