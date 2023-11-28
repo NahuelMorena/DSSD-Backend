@@ -5,6 +5,7 @@ import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
+import dssd.global.furniture.backend.model.MaterialInCollection;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,4 +18,8 @@ public interface CloudApiService {
     public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer);
     public List<DateSpaceApiDTO> getDateSpaces();
     public DateSpaceApiDTO reserveDateSpace(ReserveDateSpaceRequestDTO reserveDateSpace);
+    public Boolean checkExistenceOfDelays(List<Long> list);
+    public Boolean checkArrivalOfAllMaterials(Long reserve_id);
+    public Boolean checkAvailableManufacturingSpace();
+    public Boolean manufacturingCompletionInquiry(Long reserve_id);
 }

@@ -6,6 +6,7 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.QueryRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
 import dssd.global.furniture.backend.services.interfaces.CloudApiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.swing.text.html.Option;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CloudApiServiceImplementation implements CloudApiService {
@@ -73,7 +75,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
             JsonNode jsonNode = mapper.readTree(responseBody);
             if (jsonNode.has("token")) {
                 this.authToken = jsonNode.get("token").asText();
-                System.out.println("Token: " + this.authToken);
+                //System.out.println("Token: " + this.authToken);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,6 +179,102 @@ public class CloudApiServiceImplementation implements CloudApiService {
             return mapper.readValue(responseBody, DateSpaceApiDTO.class);
         } catch (HttpClientErrorException.Forbidden e) {
             throw new RuntimeException("Error 403, error de autenticación JWT");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean checkExistenceOfDelays(List<Long> list) {
+        this.authenticate();
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/queryExistanceOfDelays")
+                .toUriString();
+
+        try {
+            //cargar la información
+            QueryRequestDTO queryRequestDTO = new QueryRequestDTO(list);
+            ObjectMapper m = new ObjectMapper();
+            String jsonBody = m.writeValueAsString(queryRequestDTO);
+
+            ResponseEntity<Boolean> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), Boolean.class
+            );
+
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean checkArrivalOfAllMaterials(Long reserve_id) {
+        this.authenticate();
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/checkArrivalOfAllMaterials")
+                .toUriString();
+        try {
+            //cargar la información
+            Map<String, String> data = new HashMap<>();
+            data.put("id", reserve_id.toString());
+            String jsonBody = new ObjectMapper().writeValueAsString(data);
+
+            ResponseEntity<Boolean> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), Boolean.class
+            );
+
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean checkAvailableManufacturingSpace() {
+        this.authenticate();
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("dateSpaces/checkAvailableManufacturingSpace")
+                .toUriString();
+
+        try {
+            ResponseEntity<Boolean> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.GET, this.assembleHeader(null), Boolean.class
+            );
+            return responseEntity.getBody();
+        } catch (HttpClientErrorException.Forbidden e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error 403, error de autenticacion JWT");
+        }
+    }
+
+    @Override
+    public Boolean manufacturingCompletionInquiry(Long reserve_id) {
+        this.authenticate();
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("dateSpaces/manufacturingCompletionInquiry")
+                .toUriString();
+        try {
+            //cargar la información
+            Map<String, String> data = new HashMap<>();
+            data.put("reserve_id", reserve_id.toString());
+            String jsonBody = new ObjectMapper().writeValueAsString(data);
+
+            ResponseEntity<Boolean> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), Boolean.class
+            );
+
+            return responseEntity.getBody();
         } catch (Exception e) {
             e.printStackTrace();
         }

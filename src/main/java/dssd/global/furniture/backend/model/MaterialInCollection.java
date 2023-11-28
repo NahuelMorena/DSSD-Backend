@@ -37,4 +37,12 @@ public class MaterialInCollection {
         return this.material;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Collection getCollection() {
+        return collection;
+    }
+
 }

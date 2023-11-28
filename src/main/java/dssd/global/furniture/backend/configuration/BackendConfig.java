@@ -39,7 +39,13 @@ public class BackendConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/api/mail/sendMailToIndicateStartOfManufacturing/**", "/api/mail/sendMailToIndicateEndOfManufacturing/**");
+                .excludePathPatterns("/login",
+                        "/api/mail/sendMailToIndicateStartOfManufacturing/**",
+                        "/api/mail/sendMailToIndicateEndOfManufacturing/**",
+                        "/api/collections/checkExistenceOfDelays/**",
+                        "/api/collections/checkArrivalOfAllMaterials/**",
+                        "/api/collections/checkAvailableManufacturingSpace",
+                        "/api/collections/manufacturingCompletionInquiry/**");
     }
 
 }

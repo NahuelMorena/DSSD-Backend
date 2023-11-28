@@ -5,18 +5,11 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.*;
-import dssd.global.furniture.backend.model.Collection;
-import dssd.global.furniture.backend.model.DistributionOrders;
-import dssd.global.furniture.backend.model.FurnitureInCollection;
-import dssd.global.furniture.backend.model.Rol;
-import dssd.global.furniture.backend.model.Store;
+import dssd.global.furniture.backend.model.*;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
-import dssd.global.furniture.backend.services.interfaces.CloudApiService;
-import dssd.global.furniture.backend.services.interfaces.CollectionService;
+import dssd.global.furniture.backend.services.interfaces.*;
 
-import dssd.global.furniture.backend.services.interfaces.DistributionOrderService;
-import dssd.global.furniture.backend.services.interfaces.StoreService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -30,10 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -58,6 +48,8 @@ public class CollectionController {
 	@Autowired
 	private UserServiceImplementation userService;
 
+	@Autowired
+	private MaterialInCollectionService materialInCollectionService;
 	@Autowired
 	private StoreService storeService;
 
@@ -199,6 +191,57 @@ public class CollectionController {
 		return ResponseEntity.ok(collection);
 	}
 
+	//Metodos de consulta
+	@CrossOrigin(origins = "http://localhost:60000", allowCredentials = "true")
+	@GetMapping(baseUrl + "/checkExistenceOfDelays/{id}")
+	public ResponseEntity<String> checkExistenceOfDelays(@PathVariable Long id){
+		System.out.println("Peticion para consultar existencia de retrasos de materiales");
+		Collection collection = collectionService.getCollectionByID(id)
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		List<Long> list = new ArrayList<>();
+		for (MaterialInCollection mic : materialInCollections){
+			list.add(mic.getId());
+		}
+		Boolean state = cloudApiService.checkExistenceOfDelays(list);
+		System.out.println("Valor devuelto: "+state);
+		System.out.println("---------------------------------------------------------");
+		return ResponseEntity.ok(state.toString());
+	}
+
+	@GetMapping(baseUrl + "/checkArrivalOfAllMaterials/{id}")
+	public ResponseEntity<String> checkArrivalOfAllMaterials(@PathVariable Long id){
+		System.out.println("Peticion para consultar llegada de todos los materiales");
+		Collection collection = collectionService.getCollectionByID(id)
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		Boolean state = cloudApiService.checkArrivalOfAllMaterials(materialInCollections.get(0).getId());
+		System.out.println("Valor devuelto: "+state);
+		System.out.println("---------------------------------------------------------");
+		return ResponseEntity.ok(state.toString());
+	}
+
+	@GetMapping(baseUrl + "/checkAvailableManufacturingSpace")
+	public ResponseEntity<String> checkAvailableManufacturingSpace(){
+		System.out.println("Peticion para consultar si quedan espacios de fabricacion disponibles");
+		Boolean state = cloudApiService.checkAvailableManufacturingSpace();
+		System.out.println("Valor devuelto: "+state);
+		System.out.println("---------------------------------------------------------");
+		return ResponseEntity.ok(state.toString());
+	}
+
+	@GetMapping(baseUrl + "/manufacturingCompletionInquiry/{id}")
+	public ResponseEntity<Boolean> manufacturingCompletionInquiry(@PathVariable Long id){
+		System.out.println("Peticion para consultar si finalizo el proceso de fabricacion");
+		Collection collection = collectionService.getCollectionByID(id)
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		//Boolean state = cloudApiService.manufacturingCompletionInquiry(materialInCollections.get(0).getId());
+		Boolean state = cloudApiService.manufacturingCompletionInquiry(1L);
+		System.out.println("Valor devuelto: "+state);
+		System.out.println("---------------------------------------------------------");
+		return ResponseEntity.ok(state);
+	}
 	/**
 	 *
 	 * METODOS PRIVADOS
