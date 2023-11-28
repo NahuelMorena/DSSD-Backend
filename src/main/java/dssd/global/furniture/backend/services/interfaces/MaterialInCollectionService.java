@@ -9,7 +9,5 @@ import java.util.List;
 
 @Service
 public interface MaterialInCollectionService {
-    public List<MaterialInCollection> getAllMaterialInCollectionByCollection(Collection collection);
-
     public List<MaterialInCollection> getMaterialsInCollection(Long idCollection);
 }

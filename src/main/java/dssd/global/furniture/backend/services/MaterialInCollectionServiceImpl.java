@@ -3,6 +3,7 @@ package dssd.global.furniture.backend.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import dssd.global.furniture.backend.model.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

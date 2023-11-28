@@ -221,7 +221,7 @@ public class CollectionController {
 		System.out.println("Peticion para consultar existencia de retrasos de materiales");
 		Collection collection = collectionService.getCollectionByID(id)
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
-		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getMaterialsInCollection(collection.getID());
 		List<Long> list = new ArrayList<>();
 		for (MaterialInCollection mic : materialInCollections){
 			list.add(mic.getId());
@@ -237,7 +237,7 @@ public class CollectionController {
 		System.out.println("Peticion para consultar llegada de todos los materiales");
 		Collection collection = collectionService.getCollectionByID(id)
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
-		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getMaterialsInCollection(collection.getID());
 		Boolean state = cloudApiService.checkArrivalOfAllMaterials(materialInCollections.get(0).getId());
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
@@ -258,7 +258,7 @@ public class CollectionController {
 		System.out.println("Peticion para consultar si finalizo el proceso de fabricacion");
 		Collection collection = collectionService.getCollectionByID(id)
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
-		List<MaterialInCollection> materialInCollections = materialInCollectionService.getAllMaterialInCollectionByCollection(collection);
+		List<MaterialInCollection> materialInCollections = materialInCollectionService.getMaterialsInCollection(collection.getID());
 		//Boolean state = cloudApiService.manufacturingCompletionInquiry(materialInCollections.get(0).getId());
 		Boolean state = cloudApiService.manufacturingCompletionInquiry(1L);
 		System.out.println("Valor devuelto: "+state);
