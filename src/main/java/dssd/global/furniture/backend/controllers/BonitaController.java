@@ -4,6 +4,7 @@ package dssd.global.furniture.backend.controllers;
 import java.util.List;
 import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.api.APIClient;
+import org.bonitasoft.engine.bpm.process.impl.internal.ArchivedProcessInstanceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
+import dssd.global.furniture.backend.controllers.dtos.apiBonita.ArchivedCases;
+import dssd.global.furniture.backend.controllers.dtos.request.ChangeStateRequestDTO;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
@@ -35,6 +38,23 @@ public class BonitaController {
     }
 	
 	private final String url="/api/bonita";
+	
+	@GetMapping(url+"/changeVariable")
+	public ResponseEntity<?>changeVariable(){
+		this.bonitaService.changeState(Long.valueOf(15009));
+		return new ResponseEntity("Se cambio el estado", null, HttpStatus.SC_OK);
+	}
+	
+	@GetMapping(url+"/getArchivedCases")
+	public ResponseEntity<List<ArchivedCases>> getArchivedCases(){
+		return ResponseEntity.ok(this.bonitaService.getArchivedCases());
+	}
+	
+	@PostMapping(url+"/changeState")
+	public ResponseEntity<?>changeState(){
+		this.bonitaService.changeState(Long.valueOf(15005));
+		return new ResponseEntity("Se cambio el estado", null, HttpStatus.SC_OK);
+	}
 	
 	@GetMapping(url+"/getTasksStablishMaterials")
 	public ResponseEntity<List<TaskDTO>> getAllStablishMaterials( HttpServletRequest request) {
