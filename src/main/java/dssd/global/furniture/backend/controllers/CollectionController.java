@@ -254,7 +254,7 @@ public class CollectionController {
 	}
 
 	@GetMapping(baseUrl + "/manufacturingCompletionInquiry/{id}")
-	public ResponseEntity<Boolean> manufacturingCompletionInquiry(@PathVariable Long id){
+	public ResponseEntity<String> manufacturingCompletionInquiry(@PathVariable Long id){
 		System.out.println("Peticion para consultar si finalizo el proceso de fabricacion");
 		Collection collection = collectionService.getCollectionByID(id)
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
@@ -263,7 +263,7 @@ public class CollectionController {
 		Boolean state = cloudApiService.manufacturingCompletionInquiry(1L);
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
-		return ResponseEntity.ok(state);
+		return ResponseEntity.ok(state.toString());
 	}
 	/**
 	 *
