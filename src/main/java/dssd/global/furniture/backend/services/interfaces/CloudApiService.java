@@ -17,4 +17,5 @@ public interface CloudApiService {
     public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer);
     public List<DateSpaceApiDTO> getDateSpaces();
     public DateSpaceApiDTO reserveDateSpace(ReserveDateSpaceRequestDTO reserveDateSpace);
+    public boolean isLogged();
 }

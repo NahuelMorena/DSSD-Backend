@@ -130,6 +130,14 @@ public class BonitaService {
 		}
 	}
 
+	public void nextTaskAPIQuery(Long processInstanceId) {
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Consultar API en busqueda de materiales necesarios");
+		if(humanTask!=null) {
+			Map<String,Serializable> taskVariables=new HashMap<>();
+			taskVariables.put("supplier_for_each_material", true);
+			this.executeUserTask(humanTask, taskVariables);
+		}
+	}
 	public void nextBonitaTask(Long processInstanceId, String nameTask){
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, nameTask);
 		if (humanTask != null){
@@ -173,6 +181,7 @@ public class BonitaService {
 		List<TaskDTO> list=new ArrayList<TaskDTO>();
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
 	        HumanTaskInstance item = i.next();
+	        System.out.println(item.getName());
 			if(item.getName().equals(nameTask)) {
 				String idCase=String.valueOf(item.getParentProcessInstanceId());
 				VariableBonita vb=this.bonitaApiService.getIdCollectionCase(idCase);

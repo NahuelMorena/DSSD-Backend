@@ -13,6 +13,7 @@ public class MaterialInCollection {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_collection")
+    @JsonBackReference
     private Collection collection;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -36,5 +37,15 @@ public class MaterialInCollection {
     public Material getMaterial() {
         return this.material;
     }
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+    
+    
 
 }
