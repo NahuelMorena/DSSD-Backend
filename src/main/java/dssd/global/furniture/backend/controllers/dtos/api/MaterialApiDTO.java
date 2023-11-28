@@ -19,4 +19,14 @@ public class MaterialApiDTO {
     public void setName(String name) {
         this.name = name;
     }
+
+	public MaterialApiDTO(Long id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+	
+	public MaterialApiDTO() {
+	}
+    
+    
 }

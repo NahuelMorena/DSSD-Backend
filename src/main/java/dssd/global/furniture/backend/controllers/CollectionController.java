@@ -5,8 +5,14 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.*;
-import dssd.global.furniture.backend.model.*;
+import dssd.global.furniture.backend.model.Collection;
+import dssd.global.furniture.backend.model.DistributionOrders;
+import dssd.global.furniture.backend.model.FurnitureInCollection;
+import dssd.global.furniture.backend.model.MaterialInCollection;
+import dssd.global.furniture.backend.model.Rol;
+import dssd.global.furniture.backend.model.Store;
 import dssd.global.furniture.backend.services.BonitaService;
+import dssd.global.furniture.backend.services.MaterialInCollectionServiceImpl;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import dssd.global.furniture.backend.services.interfaces.*;
 
@@ -18,17 +24,26 @@ import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +62,8 @@ public class CollectionController {
 	private DistributionOrderService distributionOrderService;
 	@Autowired
 	private UserServiceImplementation userService;
-
+	@Autowired
+	private MaterialInCollectionServiceImpl materialCollService;
 	@Autowired
 	private MaterialInCollectionService materialInCollectionService;
 	@Autowired
@@ -119,22 +135,29 @@ public class CollectionController {
     }
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-	@PostMapping(baseUrl + "/search-material-offers")
-	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@RequestBody MaterialRequestDTO request,HttpServletRequest req) {
+	@GetMapping(baseUrl + "/search-material-offers/{collectionId}")
+	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@PathVariable Long collectionId,
+			@RequestParam(name = "dateStart", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date dateForm	,HttpServletRequest req) {
 		HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
 		if(! userService.getRole(username).equals(Rol.OPERATION)) {
 			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
 		}
 		List<OffersByApiDTO> offerts = new ArrayList<>();
-		Optional<Collection> collection = this.collectionService.getCollectionByID(request.getCollection_id());
+		Optional<Collection> collection = this.collectionService.getCollectionByID(collectionId);
 		if (collection.isPresent()){
+			if(! this.cloudApiService.isLogged()) {
+				this.cloudApiService.authenticate();
+			}
 			LocalDate date = collection.get().getDate_start_manufacture();
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-			String formattedDate = date.format(formatter);
-
-			for (MaterialRequestDTO.MaterialRequest material : request.getMaterials()) {
-				offerts.addAll(cloudApiService.getOffersByMaterial(material.getName(), formattedDate));
+			if(! dateForm.before(Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()))&&(dateForm.after(new Date()))) {
+				return new ResponseEntity("La fecha ingresada no es antes que la fecha de inicio de fabricación o después de la de hoy",null,HttpStatus.SC_BAD_REQUEST);
+			}
+			SimpleDateFormat formatter=new SimpleDateFormat("dd-MM-yyyy");
+			String formattedDate = formatter.format(dateForm);
+			List<MaterialInCollection> listMatInCol=this.materialCollService.getMaterialsInCollection(collectionId);
+			for (MaterialInCollection material :listMatInCol) {
+				offerts.addAll(cloudApiService.getOffersByMaterial(material.getMaterial().getName(), formattedDate));
 			}
 		}
 		return ResponseEntity.ok(offerts);

@@ -3,8 +3,10 @@ package dssd.global.furniture.backend.services;
 import java.util.List;
 
 import org.bonitasoft.engine.bpm.data.impl.DataDefinitionImpl;
+import org.bonitasoft.engine.bpm.process.impl.internal.ArchivedProcessInstanceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dssd.global.furniture.backend.controllers.dtos.apiBonita.ArchivedCases;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
 import jakarta.servlet.http.Cookie;
 
@@ -79,6 +82,25 @@ public class BonitaApiService implements dssd.global.furniture.backend.services.
         
         return responseEntity.getBody();
 	}
+	
+	public List<ArchivedCases> getArchivedProcessInstances(){
+		RestTemplate restTemplate = restTemplateBuilder.build();
+		String url= apiUrl+"/api/bpm/archivedCase?p=0&c=100";
+		HttpHeaders headers = new HttpHeaders();
+	    Cookie cookie = new Cookie("X-Bonita-API-Token", authToken);
+	    Cookie cookiej = new Cookie("JSESSIONID", jsessionid);
+	    headers.add(HttpHeaders.COOKIE, cookie.getName()+"="+cookie.getValue());
+	    headers.add(HttpHeaders.COOKIE, cookiej.getName()+"="+cookiej.getValue());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<List<ArchivedCases>> responseEntity = restTemplate.exchange(
+        	    url,
+        	    HttpMethod.GET,
+        	    entity,
+        	    new ParameterizedTypeReference<List<ArchivedCases>>() {}
+        	);
+    	return responseEntity.getBody();
+	}
+
 	
 	public boolean isAuthenticated() {
 		return ! BonitaApiService.authToken.isBlank() ;

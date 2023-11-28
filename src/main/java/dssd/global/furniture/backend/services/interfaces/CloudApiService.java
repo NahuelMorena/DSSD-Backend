@@ -22,4 +22,5 @@ public interface CloudApiService {
     public Boolean checkArrivalOfAllMaterials(Long reserve_id);
     public Boolean checkAvailableManufacturingSpace();
     public Boolean manufacturingCompletionInquiry(Long reserve_id);
+    public boolean isLogged();
 }

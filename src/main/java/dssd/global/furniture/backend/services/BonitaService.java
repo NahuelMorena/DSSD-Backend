@@ -1,6 +1,7 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
+import dssd.global.furniture.backend.controllers.dtos.apiBonita.ArchivedCases;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.VariableBonita;
 import dssd.global.furniture.backend.model.Collection;
 
@@ -18,10 +20,15 @@ import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApplicationAPI;
 import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
+import org.bonitasoft.engine.api.TenantAPIAccessor;
 import org.bonitasoft.engine.bpm.contract.ContractViolationException;
+import org.bonitasoft.engine.bpm.flownode.ArchivedActivityInstance;
+import org.bonitasoft.engine.bpm.flownode.ArchivedActivityInstanceSearchDescriptor;
 import org.bonitasoft.engine.bpm.flownode.FlowNodeExecutionException;
 import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
 import org.bonitasoft.engine.bpm.flownode.UserTaskNotFoundException;
+import org.bonitasoft.engine.bpm.process.ArchivedProcessInstance;
+import org.bonitasoft.engine.bpm.process.ArchivedProcessInstancesSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessActivationException;
 import org.bonitasoft.engine.bpm.process.ProcessDefinition;
 import org.bonitasoft.engine.bpm.process.ProcessDefinitionNotFoundException;
@@ -30,7 +37,13 @@ import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoSearchDescriptor;
 import org.bonitasoft.engine.bpm.process.ProcessEnablementException;
 import org.bonitasoft.engine.bpm.process.ProcessExecutionException;
 import org.bonitasoft.engine.bpm.process.ProcessInstance;
+import org.bonitasoft.engine.bpm.process.ProcessInstanceNotFoundException;
+import org.bonitasoft.engine.bpm.process.impl.internal.ArchivedProcessInstanceImpl;
+import org.bonitasoft.engine.exception.BonitaHomeNotSetException;
 import org.bonitasoft.engine.exception.SearchException;
+import org.bonitasoft.engine.exception.ServerAPIException;
+import org.bonitasoft.engine.exception.UnknownAPITypeException;
+import org.bonitasoft.engine.exception.UpdateException;
 import org.bonitasoft.engine.expression.Expression;
 import org.bonitasoft.engine.expression.ExpressionBuilder;
 import org.bonitasoft.engine.expression.ExpressionType;
@@ -130,6 +143,14 @@ public class BonitaService {
 		}
 	}
 
+	public void nextTaskAPIQuery(Long processInstanceId) {
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Consultar API en busqueda de materiales necesarios");
+		if(humanTask!=null) {
+			Map<String,Serializable> taskVariables=new HashMap<>();
+			taskVariables.put("supplier_for_each_material", true);
+			this.executeUserTask(humanTask, taskVariables);
+		}
+	}
 	public void nextBonitaTask(Long processInstanceId, String nameTask){
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, nameTask);
 		if (humanTask != null){
@@ -173,6 +194,7 @@ public class BonitaService {
 		List<TaskDTO> list=new ArrayList<TaskDTO>();
 		for (Iterator<HumanTaskInstance> i = pendingTasks.iterator(); i.hasNext();) {
 	        HumanTaskInstance item = i.next();
+	        System.out.println(item.getName());
 			if(item.getName().equals(nameTask)) {
 				String idCase=String.valueOf(item.getParentProcessInstanceId());
 				VariableBonita vb=this.bonitaApiService.getIdCollectionCase(idCase);
@@ -206,130 +228,38 @@ public class BonitaService {
 		return deploymentInfoResults;
 	}
 
-	public void executeTask(long userId, long taskInstanceId) throws UserTaskNotFoundException, FlowNodeExecutionException, ContractViolationException{
-		//No hace nada aun
-		String s =this.getProcessAPI()
-				.getActivities(
-						this.getProcessDefinitionId​(Constantes.NOMBRE_PROCESO, Constantes.VERSION_PROCESO),
-						0,
-						12
-				)
-				.toString();
-		System.out.println("Lista: " + s);
-
-	}
-
-
-	/*-----------------------------------------------------------------------------------
-										Metodos no utilizados
-	------------------------------------------------------------------------------------- */
-
-	public void enableProcess(ProcessDefinition processDefinition) {
-		try {
-
-			this.getProcessAPI().enableProcess(processDefinition.getId());
-			System.out.println("A new process was enabled: " + processDefinition.getId());
-
-		} catch (ProcessDefinitionNotFoundException e) {
-			System.out.println("NO SE ENCONTRO LA DEFINICION DEL PROCESO al hacer enable");
-			e.printStackTrace();
-		} catch (ProcessEnablementException e) {
-			System.out.println("Paso algo al intentar hacer enable process definition");
-			e.printStackTrace();
+	public List<ArchivedCases> getArchivedCases() {
+		if(! this.bonitaApiService.isAuthenticated()) {
+			this.bonitaApiService.login();
 		}
-
-	}
-/* Set string variables and start a process instance
- * In this example, createInstance takes the process definition name, the process version, 
- * a map of text variables and their values. The startProcess method, which creates the process instance,
- * takes a list of operations, not a map of variables, so the map must be converted into a list of operations
- * that will set the values of the variables in the process instance. The example calls buildAssignOperation 
- * for each variable in turn, to build an operation that will assign the value to the variable when the process 
- * instance is created. Each operation is built as an assignment expression.*/
-	
-	public void createInstance(String processDefinitionName, String processVersion, Map<String, Object> variables) {
-	    ProcessAPI processAPI;
-	    try {
-	        processAPI = apiClient.getProcessAPI();
-	        long processDefinitionId = processAPI.getProcessDefinitionId(processDefinitionName, processVersion);
-
-	        List<Operation> listOperations = new ArrayList<>();
-	        for (String variableName : variables.keySet()) {
-	            if (variables.get(variableName) != null) {
-	               Operation operation = buildAssignOperation(variableName, variables.get(variableName).toString(),
-	                    String.class.getName(), ExpressionType.TYPE_CONSTANT);
-	               listOperations.add(operation);
-	            }
-	       }
-	       processAPI.startProcess(processDefinitionId, listOperations, null);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	}
-
-	private Operation buildAssignOperation(final String dataInstanceName, final String newConstantValue,
-										   final String className, final ExpressionType expressionType) throws InvalidExpressionException {
-		final LeftOperand leftOperand = new LeftOperandBuilder().createNewInstance().setName(dataInstanceName).done();
-		final Expression expression = new ExpressionBuilder().createNewInstance(dataInstanceName).setContent(newConstantValue).setExpressionType(expressionType.name()).setReturnType(className).done();
-		final Operation operation = new OperationBuilder().createNewInstance().setOperator("=").setLeftOperand(leftOperand).setType(OperatorType.ASSIGNMENT).setRightOperand(expression).done();
-		return operation;
+		List<ArchivedCases> l=this.bonitaApiService.getArchivedProcessInstances();
+		return l;
 	}
 	
-	
-/*	Set variables of any type and start a process instance
-	In this example, createCase takes the process definition name,
-	 the process version, a map of variable names and objects, and 
-	 the session identifier. The startProcess method, which creates 
-	 the process instance, takes a list of operations, not a map of 
-	 variables, so the map must be converted into a list of operations 
-	 that will set the values of the variables in the process instance. 
-	 For each variable in turn, the example builds an expression that assigns 
-	 the value to the variable to the object supplied in the map, specifying 
-	 the data type by identifying the class of the object. These expressions 
-	 are concatenated into a list of operations, which is used to initialize 
-	 the variables when the process instance is created.
-	*/
-	
-	public void createCase(String processDefinitionName, String processVersion, Map<String, Object> variables, ProcessAPI processAPI) {
-	    try {
-	        long processDefinitionId = processAPI.getProcessDefinitionId(processDefinitionName, processVersion);
-	        // ----- create list of operations -----
-	        List<Operation> listOperations = new ArrayList<>();
-	        Map<String, Serializable> listVariablesSerializable = new HashMap<>();
-
-	        for (String variableName : variables.keySet()) {
-	            Object value = variables.get(variableName);
-	            if (value != null && value instanceof Serializable) {
-	                Serializable valueSerializable = (Serializable) value;
-
-	                variableName = variableName.toLowerCase();
-	                Expression expr = new ExpressionBuilder().createExpression(variableName, variableName, value.getClass().getName(), ExpressionType.TYPE_INPUT);
-	                Operation op = new OperationBuilder().createSetDataOperation(variableName, expr);
-	                listOperations.add(op);
-	                listVariablesSerializable.put(variableName, valueSerializable);
-	            }
-	        }
-
-	        // ----- start process instance -----
-	        processAPI.startProcess(processDefinitionId, listOperations, listVariablesSerializable);
-
-	        // System.out.println("*** End Create Case ****");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+	public void changeState(Long caseId) {
+		try {
+			this.getProcessAPI().setProcessInstanceState(this.getProcessAPI().getProcessInstance(caseId),"cancelled");
+		} catch (UpdateException | ProcessInstanceNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 	
-/*	Create a map of variables and values and start a process instance
-	Create a map specifying the values of the variables required to start a case,
-	 then pass it to the instantiateProcess method, as shown in the following example:*/
-	
-	public void instantiateProcess(String processDefinitionName, String processVersion, Map<String, Serializable> variables)  {
-	    try {
-	        ProcessAPI processAPI = apiClient.getProcessAPI();
-	        long processId = processAPI.getProcessDefinitionId(processDefinitionName, processVersion);
-	        processAPI.startProcess(processId, variables);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+	public void changeVariable(Long caseId) {
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(caseId, "Consultar espacios de fabricación");
+		if(humanTask!=null) {
+			Map<String,Serializable> taskVariables=new HashMap<>();
+			LocalDate fecha = LocalDate.of(2023, 12, 20);
+			taskVariables.put("space_reservation_date", Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			try {
+				this.getProcessAPI().assignUserTask(humanTask.getId(),this.getCurrentLoggedInUser().getId());
+				if (taskVariables != null){
+					this.getProcessAPI().updateActivityInstanceVariables(humanTask.getId(),taskVariables);
+				}
+			} catch (UpdateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }
