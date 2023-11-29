@@ -1,11 +1,13 @@
 package dssd.global.furniture.backend.services;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.HashMap;
@@ -64,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dssd.global.furniture.backend.utils.Constantes;
+import jakarta.mail.internet.ParseException;
 
 @Service
 public class BonitaService {
@@ -143,11 +146,12 @@ public class BonitaService {
 		}
 	}
 
-	public void nextTaskAPIQuery(Long processInstanceId) {
+	public void nextTaskAPIQuery(Long processInstanceId,Date dateForm) {
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Consultar API en busqueda de materiales necesarios");
 		if(humanTask!=null) {
 			Map<String,Serializable> taskVariables=new HashMap<>();
 			taskVariables.put("supplier_for_each_material", true);
+			taskVariables.put("query_date_form",dateForm);
 			this.executeUserTask(humanTask, taskVariables);
 		}
 	}
@@ -261,5 +265,21 @@ public class BonitaService {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public Date getDateQuery(Long caseId) {
+		if(! this.bonitaApiService.isAuthenticated()) {
+			this.bonitaApiService.login();
+		}
+		VariableBonita vb=this.bonitaApiService.getDateQuery(caseId.toString());
+		SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",Locale.ENGLISH);
+		Date date=null;
+        try {
+            date = format.parse(vb.getValue());
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+		
 	}
 }

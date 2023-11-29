@@ -9,6 +9,7 @@ public class OffersToReserveDTO {
     public static class Offer {
         private Long idProviderOfferMaterial;
         private Integer quantity;
+        private String nameMaterial;
 
         public Long getIdProviderOfferMaterial() {
             return idProviderOfferMaterial;
@@ -25,6 +26,15 @@ public class OffersToReserveDTO {
         public void setQuantity(Integer quantity) {
             this.quantity = quantity;
         }
+
+		public String getNameMaterial() {
+			return nameMaterial;
+		}
+
+		public void setNameMaterial(String nameMaterial) {
+			this.nameMaterial = nameMaterial;
+		}
+        
     }
 
     public List<Offer> getOffers() {

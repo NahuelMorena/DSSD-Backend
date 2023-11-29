@@ -83,6 +83,21 @@ public class BonitaApiService implements dssd.global.furniture.backend.services.
         return responseEntity.getBody();
 	}
 	
+	public VariableBonita getDateQuery(String caseId) {
+		RestTemplate restTemplate = restTemplateBuilder.build();
+	    String caseVariableUrl = apiUrl + "/api/bpm/caseVariable/" + caseId + "/query_date_form";
+	    HttpHeaders headers = new HttpHeaders();
+	    Cookie cookie = new Cookie("X-Bonita-API-Token", authToken);
+	    Cookie cookiej = new Cookie("JSESSIONID", jsessionid);
+	    headers.add(HttpHeaders.COOKIE, cookie.getName()+"="+cookie.getValue());
+	    headers.add(HttpHeaders.COOKIE, cookiej.getName()+"="+cookiej.getValue());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<VariableBonita> responseEntity = restTemplate.exchange(
+            caseVariableUrl, HttpMethod.GET, entity, VariableBonita.class);
+        
+        return responseEntity.getBody();
+	}
+	
 	public List<ArchivedCases> getArchivedProcessInstances(){
 		RestTemplate restTemplate = restTemplateBuilder.build();
 		String url= apiUrl+"/api/bpm/archivedCase?p=0&c=100";

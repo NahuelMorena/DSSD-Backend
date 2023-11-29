@@ -137,7 +137,7 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@GetMapping(baseUrl + "/search-material-offers/{collectionId}")
 	public ResponseEntity<List<OffersByApiDTO>> searchMaterialsOffersAPI(@PathVariable Long collectionId,
-			@RequestParam(name = "dateStart", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date dateForm	,HttpServletRequest req) {
+			@RequestParam(name = "dateStart", required = true) @DateTimeFormat(pattern = "dd-MM-yyyy") Date dateForm	,HttpServletRequest req) {
 		HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
 		if(! userService.getRole(username).equals(Rol.OPERATION)) {
@@ -164,8 +164,8 @@ public class CollectionController {
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-	@PostMapping(baseUrl + "/reserve-materials")
-	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@RequestBody OffersToReserveDTO request,HttpServletRequest req){
+	@PostMapping(baseUrl + "/reserve-materials/{collectionId}")
+	public ResponseEntity<List<ReserveByApiDTO>> reserveMaterials(@PathVariable Long collectionId,@RequestBody OffersToReserveDTO request,HttpServletRequest req){
 		HttpSession session=req.getSession(false);
 		String username=(String)session.getAttribute("username");
 		if(! userService.getRole(username).equals(Rol.OPERATION)) {
@@ -173,7 +173,11 @@ public class CollectionController {
 		}
 		List<ReserveByApiDTO> reserves = new ArrayList<>();
 		for (OffersToReserveDTO.Offer offer : request.getOffers()){
-			reserves.add(cloudApiService.reserveMaterials(offer));
+			ReserveByApiDTO r=cloudApiService.reserveMaterials(offer);
+			if(r!=null) {
+				reserves.add(r);
+				this.materialCollService.updateMaterialInCollection(collectionId,offer.getNameMaterial(),offer.getQuantity());
+			}
 		}
 		return ResponseEntity.ok(reserves);
 	}

@@ -7,6 +7,7 @@ public class ReserveByApiDTO {
     private Integer number_of_rescheduling;
     private ProviderApiDTO provider;
     private MaterialApiDTO material;
+    private DateSpaceApiDTO dateSpaces;
 
     public Long getId() {
         return id;
@@ -55,4 +56,14 @@ public class ReserveByApiDTO {
     public void setMaterial(MaterialApiDTO material) {
         this.material = material;
     }
+
+	public DateSpaceApiDTO getDateSpaces() {
+		return dateSpaces;
+	}
+
+	public void setDateSpaces(DateSpaceApiDTO dateSpaces) {
+		this.dateSpaces = dateSpaces;
+	}
+    
+    
 }
