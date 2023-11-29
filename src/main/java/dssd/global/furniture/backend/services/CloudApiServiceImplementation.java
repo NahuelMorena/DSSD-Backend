@@ -142,7 +142,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
         this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
-                .path("/dateSpaces/getAvailableSpaces")
+                .path("dateSpaces/getAvailableSpaces")
                 .toUriString();
 
 

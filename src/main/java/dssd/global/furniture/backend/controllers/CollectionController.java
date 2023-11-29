@@ -196,6 +196,9 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@GetMapping(baseUrl + "/get-dateSpaces")
 	public ResponseEntity<List<DateSpaceApiDTO>> getDateSpaces(){
+		if(! this.cloudApiService.isLogged()) {
+			this.cloudApiService.authenticate();
+		}
 		return ResponseEntity.ok(cloudApiService.getDateSpaces());
 	}
 
