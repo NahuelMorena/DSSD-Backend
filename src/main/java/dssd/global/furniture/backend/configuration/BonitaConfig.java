@@ -11,13 +11,14 @@ import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.util.APITypeManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import dssd.global.furniture.backend.services.BonitaService;
 
 @Configuration
 public class BonitaConfig {
+	
 	@Bean
     public APIClient bonitaAPISession() throws Exception {
 		
@@ -33,9 +34,7 @@ public class BonitaConfig {
 		System.out.println(settings.toString());
     	// First of all, let's log in on the engine:
     	org.bonitasoft.engine.api.APIClient apiClient = new APIClient();
-    	
-		apiClient.login("walter.bates", "bpm"); // use "install" / "install" if you don't have any other user created
-    	
+    	apiClient.login("walter.bates","bpm");
     	return apiClient;
 	}
 

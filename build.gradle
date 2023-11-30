@@ -6,6 +6,7 @@ plugins {
 
 group = 'dssd.global.furniture'
 version = '0.0.1-SNAPSHOT'
+apply plugin: "eclipse"
 
 java {
 	sourceCompatibility = '17'
@@ -27,7 +28,9 @@ dependencies {
 	implementation 'org.bonitasoft.engine:bonita-client:8.0.0'
 	// https://mvnrepository.com/artifact/org.bonitasoft.connectors/bonita-connectors
 	implementation 'org.bonitasoft.connectors:bonita-connectors:1.0.0'
-	
+
+	//Mails
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	
 	
 	

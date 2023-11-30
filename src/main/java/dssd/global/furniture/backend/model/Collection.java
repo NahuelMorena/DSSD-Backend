@@ -1,14 +1,13 @@
 package dssd.global.furniture.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -19,15 +18,20 @@ public class Collection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @OneToMany(mappedBy = "collection")
-    @JsonManagedReference
     private Set<FurnitureInCollection> furnitures;
+
+    @OneToMany(mappedBy = "collection")
+    private Set<MaterialInCollection> materials;
 
     private LocalDate date_start_manufacture;
 
     private LocalDate date_end_manufacture;
 
-    private LocalDate  estimated_release_date;
+    private LocalDate estimated_release_date;
+
+    private Integer units;
 
     public Collection(){}
 
@@ -41,10 +45,11 @@ public class Collection {
     
     
 
-	public Collection(LocalDate date_start_manufacture,LocalDate date_end_manufacture, LocalDate estimated_release_date) {
+	public Collection(LocalDate date_start_manufacture,LocalDate date_end_manufacture, LocalDate estimated_release_date, Integer units) {
 		this.date_start_manufacture = date_start_manufacture;
 		this.date_end_manufacture = date_end_manufacture;
 		this.estimated_release_date = estimated_release_date;
+        this.units = units;
 	}
 
 	public Set<FurnitureInCollection> getFurnitures() {
@@ -55,6 +60,9 @@ public class Collection {
         this.furnitures = furnitures;
     }
 
+    public Long getID() {
+        return id;
+    }
     public LocalDate getDate_start_manufacture() {
         return date_start_manufacture;
     }
@@ -77,6 +85,22 @@ public class Collection {
 
     public void setEstimated_release_date(LocalDate estimated_release_date) {
         this.estimated_release_date = estimated_release_date;
+    }
+
+    public Set<MaterialInCollection> getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(Set<MaterialInCollection> materials) {
+        this.materials = materials;
+    }
+
+    public Integer getUnits() {
+        return units;
+    }
+
+    public void setUnits(Integer units) {
+        this.units = units;
     }
 
     @Override

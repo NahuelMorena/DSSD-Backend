@@ -1,5 +1,6 @@
 package dssd.global.furniture.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -19,6 +20,7 @@ public class Furniture {
     private String description;
 
     @OneToMany(mappedBy = "furniture")
+    @JsonIgnore
     private Set<FurnitureInCollection> collections;
 
     @Enumerated(EnumType.STRING)
@@ -55,8 +57,6 @@ public class Furniture {
 	public String getModel_name() {
         return model_name;
     }
-	
-	
 
     public Long getId() {
 		return id;
