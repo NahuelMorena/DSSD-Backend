@@ -21,7 +21,6 @@ import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.ArchivedCases;
 import dssd.global.furniture.backend.controllers.dtos.request.ChangeStateRequestDTO;
 import dssd.global.furniture.backend.model.Rol;
-import dssd.global.furniture.backend.repositories.BonitaInstanceRepository;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,9 +34,6 @@ public class BonitaController {
 	
 	@Autowired
 	UserServiceImplementation userService;
-	
-	@Autowired
-	BonitaInstanceRepository bonitaRepository;
 	
 	
 	private final APIClient bonitaAPIClient;
@@ -53,10 +49,6 @@ public class BonitaController {
 		return ResponseEntity.ok(this.bonitaService.getArchivedCases());
 	}
 	
-	@GetMapping(url+"/getFailedCases")
-	public ResponseEntity<Integer> getFailedCases(){
-		return ResponseEntity.ok(bonitaRepository.getById(Long.valueOf(1)).getQuantity());
-	}
 	
 	@GetMapping(url+"/getTasksStablishMaterials")
 	public ResponseEntity<List<TaskDTO>> getAllStablishMaterials( HttpServletRequest request) {

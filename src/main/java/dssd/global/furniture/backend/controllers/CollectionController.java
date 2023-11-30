@@ -5,14 +5,12 @@ import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.*;
-import dssd.global.furniture.backend.model.BonitaInstanceFail;
 import dssd.global.furniture.backend.model.Collection;
 import dssd.global.furniture.backend.model.DistributionOrders;
 import dssd.global.furniture.backend.model.FurnitureInCollection;
 import dssd.global.furniture.backend.model.MaterialInCollection;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.model.Store;
-import dssd.global.furniture.backend.repositories.BonitaInstanceRepository;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.MaterialInCollectionServiceImpl;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
@@ -70,8 +68,6 @@ public class CollectionController {
 	private MaterialInCollectionService materialInCollectionService;
 	@Autowired
 	private StoreService storeService;
-	@Autowired
-	private BonitaInstanceRepository bonitaRepository;
 
     private final String baseUrl = "/api/collections";
 
