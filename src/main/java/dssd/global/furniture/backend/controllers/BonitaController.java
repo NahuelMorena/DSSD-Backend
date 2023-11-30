@@ -44,21 +44,9 @@ public class BonitaController {
 	
 	private final String url="/api/bonita";
 	
-	@GetMapping(url+"/changeVariable")
-	public ResponseEntity<?>changeVariable(){
-		this.bonitaService.changeState(Long.valueOf(15009));
-		return new ResponseEntity("Se cambio el estado", null, HttpStatus.SC_OK);
-	}
-	
 	@GetMapping(url+"/getArchivedCases")
 	public ResponseEntity<List<ArchivedCases>> getArchivedCases(){
 		return ResponseEntity.ok(this.bonitaService.getArchivedCases());
-	}
-	
-	@PostMapping(url+"/changeState")
-	public ResponseEntity<?>changeState(){
-		this.bonitaService.changeState(Long.valueOf(15005));
-		return new ResponseEntity("Se cambio el estado", null, HttpStatus.SC_OK);
 	}
 	
 	@GetMapping(url+"/getTasksStablishMaterials")
@@ -154,6 +142,17 @@ public class BonitaController {
 		}
 		Date date=this.bonitaService.getDateQuery(idCase);
 		return ResponseEntity.ok(date);
+	}
+	
+	@GetMapping(url + "/getTaskReserveDatesSpace")
+	public ResponseEntity<List<TaskDTO>> getAllReserveDataSpaces(HttpServletRequest request){
+		HttpSession session=request.getSession(false);
+		String username=(String)session.getAttribute("username");
+		if(! userService.getRole(username).equals(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones",null, HttpStatus.SC_FORBIDDEN);
+		}
+		List<TaskDTO> l=this.bonitaService.getAllTaskByName("Establecer reserva de espacio de fabricación");
+		return ResponseEntity.ok(l);
 	}
 	
 

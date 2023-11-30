@@ -240,9 +240,9 @@ public class BonitaService {
 		return l;
 	}
 	
-	public void changeState(Long caseId) {
+	public void changeStateToCancelled(Long caseId) {
 		try {
-			this.getProcessAPI().setProcessInstanceState(this.getProcessAPI().getProcessInstance(caseId),"cancelled");
+			this.getProcessAPI().cancelProcessInstance(caseId);;
 		} catch (UpdateException | ProcessInstanceNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

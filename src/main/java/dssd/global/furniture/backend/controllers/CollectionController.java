@@ -200,12 +200,18 @@ public class CollectionController {
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@GetMapping(baseUrl + "/get-dateSpaces")
 	public ResponseEntity<List<DateSpaceApiDTO>> getDateSpaces(){
+		if(! this.cloudApiService.isLogged()) {
+			this.cloudApiService.authenticate();
+		}
 		return ResponseEntity.ok(cloudApiService.getDateSpaces());
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/reserve-dateSpace")
 	public ResponseEntity<DateSpaceApiDTO> reserveDateSpace(@RequestBody DatesSpaceRequestDTO request){
+		if(! this.cloudApiService.isLogged()) {
+			this.cloudApiService.authenticate();
+		}
 		List<ReserveDateSpaceRequestDTO.ReserveID> list = new ArrayList<>();
 		for(ReserveByApiDTO reserve : this.cloudApiService.getByIdCollection(request.getCollection_id())){
 			list.add(new ReserveDateSpaceRequestDTO.ReserveID(reserve.getId()));
@@ -255,12 +261,16 @@ public class CollectionController {
 		return ResponseEntity.ok(state.toString());
 	}
 
-	@GetMapping(baseUrl + "/checkAvailableManufacturingSpace")
-	public ResponseEntity<String> checkAvailableManufacturingSpace(){
+	@GetMapping(baseUrl + "/checkAvailableManufacturingSpace/{id}")
+	public ResponseEntity<String> checkAvailableManufacturingSpace(@PathVariable Long id){
 		System.out.println("Peticion para consultar si quedan espacios de fabricacion disponibles");
+		System.out.println(id);
 		Boolean state = cloudApiService.checkAvailableManufacturingSpace();
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
+		if(!state) {
+			this.bonitaService.changeStateToCancelled(id);
+		}
 		return ResponseEntity.ok(state.toString());
 	}
 

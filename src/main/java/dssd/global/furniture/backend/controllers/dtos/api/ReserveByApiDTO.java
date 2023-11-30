@@ -8,6 +8,7 @@ public class ReserveByApiDTO {
     private ProviderApiDTO provider;
     private MaterialApiDTO material;
     private DateSpaceApiDTO dateSpaces;
+    private Long collectionId;
 
     public Long getId() {
         return id;
@@ -64,6 +65,16 @@ public class ReserveByApiDTO {
 	public void setDateSpaces(DateSpaceApiDTO dateSpaces) {
 		this.dateSpaces = dateSpaces;
 	}
+
+	public Long getCollectionId() {
+		return collectionId;
+	}
+
+	public void setCollectionId(Long collectionId) {
+		this.collectionId = collectionId;
+	}
+	
+	
     
     
 }
