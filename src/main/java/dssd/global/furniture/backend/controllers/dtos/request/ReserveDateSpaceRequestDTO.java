@@ -7,8 +7,17 @@ public class ReserveDateSpaceRequestDTO {
     private Long dateSpace_id;
     private List<ReserveID> reserves;
 
+    public ReserveDateSpaceRequestDTO(Long dateSpace_id, List<ReserveID> reserves) {
+        this.dateSpace_id = dateSpace_id;
+        this.reserves = reserves;
+    }
+
     public static class ReserveID {
         private long id;
+
+        public ReserveID(long id) {
+            this.id = id;
+        }
 
         public long getId() {
             return id;

@@ -173,7 +173,7 @@ public class CollectionController {
 		}
 		List<ReserveByApiDTO> reserves = new ArrayList<>();
 		for (OffersToReserveDTO.Offer offer : request.getOffers()){
-			ReserveByApiDTO r=cloudApiService.reserveMaterials(offer);
+			ReserveByApiDTO r=cloudApiService.reserveMaterials(offer,collectionId);
 			if(r!=null) {
 				reserves.add(r);
 				this.materialCollService.updateMaterialInCollection(collectionId,offer.getNameMaterial(),offer.getQuantity());
@@ -205,8 +205,15 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/reserve-dateSpace")
-	public ResponseEntity<DateSpaceApiDTO> reserveDateSpace(@RequestBody ReserveDateSpaceRequestDTO request){
-		return ResponseEntity.ok(cloudApiService.reserveDateSpace(request));
+	public ResponseEntity<DateSpaceApiDTO> reserveDateSpace(@RequestBody DatesSpaceRequestDTO request){
+		List<ReserveDateSpaceRequestDTO.ReserveID> list = new ArrayList<>();
+		for(ReserveByApiDTO reserve : this.cloudApiService.getByIdCollection(request.getCollection_id())){
+			list.add(new ReserveDateSpaceRequestDTO.ReserveID(reserve.getId()));
+		}
+		ReserveDateSpaceRequestDTO reserves = new ReserveDateSpaceRequestDTO(request.getDateSpace_id(),list);
+		DateSpaceApiDTO dateSpace = cloudApiService.reserveDateSpace(reserves);
+		this.bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Establecer reserva de espacio de fabricación");
+		return ResponseEntity.ok(dateSpace);
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")

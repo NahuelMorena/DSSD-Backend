@@ -1,5 +1,7 @@
 package dssd.global.furniture.backend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
@@ -110,7 +112,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
     }
 
     @Override
-    public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer) {
+    public ReserveByApiDTO reserveMaterials(OffersToReserveDTO.Offer offer, Long collection_id) {
         this.verifyToken();
 
         String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
@@ -120,6 +122,7 @@ public class CloudApiServiceImplementation implements CloudApiService {
         try {
             Map<String, String> data = new HashMap<>();
             data.put("idProviderOfferMaterial", offer.getIdProviderOfferMaterial().toString());
+            data.put("collection_id", collection_id.toString());
             data.put("quantity", offer.getQuantity().toString());
             String jsonBody = new ObjectMapper().writeValueAsString(data);
 
@@ -283,5 +286,27 @@ public class CloudApiServiceImplementation implements CloudApiService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<ReserveByApiDTO> getByIdCollection(Long collection_id) {
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/getByCollectionId/")//
+                .path(String.valueOf(collection_id))
+                .toUriString();
+
+        try {
+            ResponseEntity<ReserveByApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.GET, this.assembleHeader(null), ReserveByApiDTO[].class
+            );
+            ReserveByApiDTO[] response = responseEntity.getBody();
+            return Arrays.asList(response);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error 403, error de autenticacion JWT");
+        }
     }
 }
