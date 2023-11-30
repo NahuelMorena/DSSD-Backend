@@ -44,7 +44,7 @@ public class BackendConfig implements WebMvcConfigurer {
                         "/api/mail/sendMailToIndicateEndOfManufacturing/**",
                         "/api/collections/checkExistenceOfDelays/**",
                         "/api/collections/checkArrivalOfAllMaterials/**",
-                        "/api/collections/checkAvailableManufacturingSpace",
+                        "/api/collections/check/**",
                         "/api/collections/manufacturingCompletionInquiry/**");
     }
 

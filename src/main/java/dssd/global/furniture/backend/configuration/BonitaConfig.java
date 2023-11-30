@@ -11,13 +11,20 @@ import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.APIClient;
 import org.bonitasoft.engine.api.ApiAccessType;
 import org.bonitasoft.engine.util.APITypeManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import dssd.global.furniture.backend.model.BonitaInstanceFail;
+import dssd.global.furniture.backend.repositories.BonitaInstanceRepository;
 import dssd.global.furniture.backend.services.BonitaService;
 
 @Configuration
 public class BonitaConfig {
+	
+	@Autowired
+	private BonitaInstanceRepository bonitaRepository;
+	
 	@Bean
     public APIClient bonitaAPISession() throws Exception {
 		

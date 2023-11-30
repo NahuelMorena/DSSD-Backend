@@ -142,6 +142,7 @@ public class BonitaService {
 			taskVariables.put("date_end_manufacture", Date.from(collection.getDate_end_manufacture().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 			taskVariables.put("estimated_release_date", Date.from(collection.getEstimated_release_date().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 			taskVariables.put("email", mail);
+			taskVariables.put("id_case", processInstanceId);
 			this.executeUserTask(humanTask, taskVariables);
 		}
 	}
