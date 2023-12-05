@@ -156,6 +156,15 @@ public class BonitaService {
 			this.executeUserTask(humanTask, taskVariables);
 		}
 	}
+	public void nextTaskToEvaluateCollection(Long processInstanceId, Boolean decision){
+		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, "Evaluar la viabilidad de la colección");
+		if(humanTask!=null) {
+			Map<String,Serializable> taskVariables=new HashMap<>();
+			taskVariables.put("space_available", decision);
+			this.executeUserTask(humanTask, taskVariables);
+		}
+	}
+
 	public void nextBonitaTask(Long processInstanceId, String nameTask){
 		HumanTaskInstance humanTask = this.getHumanTaskInstance(processInstanceId, nameTask);
 		if (humanTask != null){

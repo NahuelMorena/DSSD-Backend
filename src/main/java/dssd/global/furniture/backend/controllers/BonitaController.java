@@ -7,11 +7,8 @@ import java.util.Date;
 import java.util.List;
 import org.apache.http.HttpStatus;
 import org.bonitasoft.engine.api.APIClient;
-import org.bonitasoft.engine.bpm.process.impl.internal.ArchivedProcessInstanceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import dssd.global.furniture.backend.controllers.dtos.TaskDTO;
 import dssd.global.furniture.backend.controllers.dtos.apiBonita.ArchivedCases;
-import dssd.global.furniture.backend.controllers.dtos.request.ChangeStateRequestDTO;
 import dssd.global.furniture.backend.model.Rol;
 import dssd.global.furniture.backend.services.BonitaService;
 import dssd.global.furniture.backend.services.UserServiceImplementation;
@@ -155,6 +151,16 @@ public class BonitaController {
 		List<TaskDTO> l=this.bonitaService.getAllTaskByName("Establecer reserva de espacio de fabricación");
 		return ResponseEntity.ok(l);
 	}
-	
+
+	@GetMapping(url+"/getTasksEvaluateCollection")
+	public ResponseEntity<List<TaskDTO>> getTasksEvaluateCollection(HttpServletRequest request){
+		HttpSession session = request.getSession(false);
+		String username = (String) session.getAttribute("username");
+		if (! userService.getRole(username).equals(Rol.OPERATION)) {
+			return new ResponseEntity("No se permiten las acciones", null, HttpStatus.SC_FORBIDDEN);
+		}
+		List<TaskDTO> l = this.bonitaService.getAllTaskByName("Evaluar la viabilidad de la colección");
+		return ResponseEntity.ok(l);
+	}
 
 }

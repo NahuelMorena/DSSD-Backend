@@ -41,7 +41,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -224,11 +223,26 @@ public class CollectionController {
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/launch-to-market")
-	public ResponseEntity<Collection> launchToMarket(@RequestBody LaunchRequestDTO request){
+	public ResponseEntity<Collection> launchToMarket(@RequestBody IDsRequestDTO request){
 		Collection collection = collectionService.getCollectionByID(request.getCollection_id())
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
 		bonitaService.nextBonitaTask(request.getProcess_instance_id(), "Lanzar la colección al mercado");
 		return ResponseEntity.ok(collection);
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/re-asign-dateSpace")
+	public ResponseEntity<String> reAsignDateSpace(@RequestBody IDsRequestDTO request){
+		bonitaService.nextTaskToEvaluateCollection(request.getProcess_instance_id(), true);
+		return ResponseEntity.ok("Se vuelve a asignar espacio de fabricación");
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/abort-collection")
+	public ResponseEntity<String> abortCollection(@RequestBody IDsRequestDTO request){
+		System.out.println("id de proceso:"+request.getProcess_instance_id());
+		this.bonitaService.changeStateToCancelled(request.getProcess_instance_id());
+		return ResponseEntity.ok("Se aborto el proceso de fabricación");
 	}
 
 	//Metodos de consulta
@@ -254,8 +268,9 @@ public class CollectionController {
 		System.out.println("Peticion para consultar llegada de todos los materiales");
 		Collection collection = collectionService.getCollectionByID(id)
 				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
-		List<MaterialInCollection> materialInCollections = materialInCollectionService.getMaterialsInCollection(collection.getID());
-		Boolean state = cloudApiService.checkArrivalOfAllMaterials(materialInCollections.get(0).getId());
+		//List<MaterialInCollection> materialInCollections = materialInCollectionService.getMaterialsInCollection(collection.getID());
+		//Boolean state = cloudApiService.checkArrivalOfAllMaterials(materialInCollections.get(0).getId());
+		Boolean state = cloudApiService.checkArrivalOfAllMaterials(1L);
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
 		return ResponseEntity.ok(state.toString());

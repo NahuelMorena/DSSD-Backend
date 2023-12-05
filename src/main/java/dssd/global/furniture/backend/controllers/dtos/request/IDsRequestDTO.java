@@ -1,6 +1,6 @@
 package dssd.global.furniture.backend.controllers.dtos.request;
 
-public class LaunchRequestDTO {
+public class IDsRequestDTO {
     private Long collection_id;
     private Long process_instance_id;
 
