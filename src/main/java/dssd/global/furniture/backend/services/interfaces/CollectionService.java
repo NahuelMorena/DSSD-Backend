@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import dssd.global.furniture.backend.controllers.dtos.CollectionDTO;
 import org.springframework.stereotype.Service;
 
 import dssd.global.furniture.backend.controllers.dtos.request.MaterialRequestDTO;
@@ -22,4 +23,6 @@ public interface CollectionService {
 	public Optional<Collection> getCollectionByID(Long id);
 	
 	public void createMaterialInCollection(Collection collection, List<MaterialRequest> lm);
+
+	public Collection rescheduleCollection(Collection collection);
 }

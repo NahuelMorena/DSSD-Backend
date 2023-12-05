@@ -245,6 +245,19 @@ public class CollectionController {
 		return ResponseEntity.ok("Se aborto el proceso de fabricación");
 	}
 
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/reschedule-collection/{collectionId}/{idCase}")
+	public ResponseEntity<Collection> rescheduleCollection(@PathVariable Long collectionId, @PathVariable Long idCase, @RequestBody CollectionDTO request){
+		Collection collection = collectionService.getCollectionByID(collectionId)
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		collection.setDate_start_manufacture(request.getDate_start_manufacture());
+		collection.setDate_end_manufacture(request.getDate_end_manufacture());
+		collection.setEstimated_release_date(request.getEstimated_release_date());
+		Collection saveCollection = this.collectionService.rescheduleCollection(collection);
+		this.bonitaService.nextTaskToEvaluateCollection(idCase,true);
+		return ResponseEntity.ok(saveCollection);
+	}
+
 	//Metodos de consulta
 	@CrossOrigin(origins = "http://localhost:60000", allowCredentials = "true")
 	@GetMapping(baseUrl + "/checkExistenceOfDelays/{id}")
@@ -273,18 +286,6 @@ public class CollectionController {
 		Boolean state = cloudApiService.checkArrivalOfAllMaterials(1L);
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
-		return ResponseEntity.ok(state.toString());
-	}
-
-	@GetMapping(baseUrl + "/check/{id}")
-	public ResponseEntity<String> checkAvailableManufacturingSpace(@PathVariable Long id){
-		System.out.println("Peticion para consultar si quedan espacios de fabricacion disponibles");
-		Boolean state = cloudApiService.checkAvailableManufacturingSpace();
-		System.out.println("Valor devuelto: "+state);
-		System.out.println("---------------------------------------------------------");
-		if(!state) {
-			this.bonitaService.changeStateToCancelled(id);
-		}
 		return ResponseEntity.ok(state.toString());
 	}
 
