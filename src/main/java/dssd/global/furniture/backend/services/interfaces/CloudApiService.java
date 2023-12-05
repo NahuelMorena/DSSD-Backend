@@ -2,6 +2,7 @@ package dssd.global.furniture.backend.services.interfaces;
 
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.DatesDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.DatesSpaceRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
@@ -9,6 +10,7 @@ import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRe
 import dssd.global.furniture.backend.model.MaterialInCollection;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,4 +27,5 @@ public interface CloudApiService {
     public Boolean manufacturingCompletionInquiry(Long reserve_id);
     public boolean isLogged();
     public List<ReserveByApiDTO> getByIdCollection(Long collection_id);
+    public List<DateSpaceApiDTO> getDateSpacesFilterByDates(DatesDTO dates);
 }

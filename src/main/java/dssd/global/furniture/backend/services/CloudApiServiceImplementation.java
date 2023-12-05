@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
+import dssd.global.furniture.backend.controllers.dtos.request.DatesDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.QueryRequestDTO;
@@ -20,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.swing.text.html.Option;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -308,5 +311,34 @@ public class CloudApiServiceImplementation implements CloudApiService {
             e.printStackTrace();
             throw new RuntimeException("Error 403, error de autenticacion JWT");
         }
+    }
+
+    @Override
+    public List<DateSpaceApiDTO> getDateSpacesFilterByDates(DatesDTO dates) {
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("dateSpaces/getAvailableSpacesByDates")
+                .toUriString();
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            Map<String, String> data = new HashMap<>();
+            data.put("available_from", dates.getAvailable_from().format(formatter));
+            data.put("available_until", dates.getAvailable_until().format(formatter));
+            String jsonBody = new ObjectMapper().writeValueAsString(data);
+
+            ResponseEntity<DateSpaceApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), DateSpaceApiDTO[].class
+            );
+
+            DateSpaceApiDTO[] response = responseEntity.getBody();
+            return Arrays.asList(response);
+        } catch (HttpClientErrorException.Forbidden e) {
+            throw new RuntimeException("Error 403, error de autenticación JWT");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

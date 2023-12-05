@@ -206,6 +206,21 @@ public class CollectionController {
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@PostMapping(baseUrl + "/get-dateSpaces-filter-by-dates")
+	public ResponseEntity<List<DateSpaceApiDTO>> getDateSpacesFilterByDates(@RequestBody DatesDTO request){
+		System.out.println("Entro por aca");
+		System.out.println("from: "+ request.getAvailable_from());
+		System.out.println("until: "+ request.getAvailable_until());
+		if (request.getAvailable_from() == null || request.getAvailable_until() == null || request.getAvailable_from().isAfter(request.getAvailable_until())){
+			return new ResponseEntity("La fecha 'inicio de fabricación' debe ser anterior a la fecha 'fin de fabricación'",null,HttpStatus.SC_BAD_REQUEST);
+		}
+		if (! this.cloudApiService.isLogged()) {
+			this.cloudApiService.authenticate();
+		}
+		return ResponseEntity.ok(cloudApiService.getDateSpacesFilterByDates(request));
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/reserve-dateSpace")
 	public ResponseEntity<DateSpaceApiDTO> reserveDateSpace(@RequestBody DatesSpaceRequestDTO request){
 		if(! this.cloudApiService.isLogged()) {
