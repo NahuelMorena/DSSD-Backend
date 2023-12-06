@@ -243,11 +243,26 @@ public class CollectionController {
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+	@GetMapping(baseUrl + "/get-all-reserves/{collectionId}")
+	public ResponseEntity<List<ReserveByApiDTO>> getAllReservesByCollection(@PathVariable Long collectionId){
+		Collection collection = collectionService.getCollectionByID(collectionId)
+				.orElseThrow(() -> new RuntimeException("La colección no se encontro"));
+		List<ReserveByApiDTO> list = cloudApiService.getAllReserves();
+		System.out.println("Tamaño de la lista: "+list.size());
+
+		return ResponseEntity.ok(list.stream().filter(reserve -> reserve.getCollectionId() != null && reserve.getCollectionId().equals(collection.getID())).toList());
+	}
+
+
+
+	/**
+	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/re-asign-dateSpace")
 	public ResponseEntity<String> reAsignDateSpace(@RequestBody IDsRequestDTO request){
 		bonitaService.nextTaskToEvaluateCollection(request.getProcess_instance_id(), true);
 		return ResponseEntity.ok("Se vuelve a asignar espacio de fabricación");
 	}
+	 **/
 
 	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	@PostMapping(baseUrl + "/abort-collection")
@@ -283,6 +298,13 @@ public class CollectionController {
 			list.add(mic.getId());
 		}
 		Boolean state = cloudApiService.checkExistenceOfDelays(list);
+		if (state){
+			List<ReserveByApiDTO> reservesList = cloudApiService.getAllReserves();
+			List<ReserveByApiDTO> reservesOfCollection = reservesList.stream().filter(reserve -> reserve.getCollectionId() != null && reserve.getCollectionId().equals(collection.getID())).toList();
+			List<ReserveDateSpaceRequestDTO.ReserveID> reservesId = reservesOfCollection.stream().map(reserve -> new ReserveDateSpaceRequestDTO.ReserveID(reserve.getId())).toList();
+			reservesOfCollection = cloudApiService.reschedulerReserves(reservesId);
+			System.out.println("Se actualizaron la fechas de entrega de las reservas");
+		}
 		System.out.println("Valor devuelto: "+state);
 		System.out.println("---------------------------------------------------------");
 		return ResponseEntity.ok(state.toString());

@@ -3,11 +3,9 @@ package dssd.global.furniture.backend.services.interfaces;
 import dssd.global.furniture.backend.controllers.dtos.api.DateSpaceApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.OffersByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.DatesDTO;
-import dssd.global.furniture.backend.controllers.dtos.request.DatesSpaceRequestDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.OffersToReserveDTO;
 import dssd.global.furniture.backend.controllers.dtos.api.ReserveByApiDTO;
 import dssd.global.furniture.backend.controllers.dtos.request.ReserveDateSpaceRequestDTO;
-import dssd.global.furniture.backend.model.MaterialInCollection;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,4 +26,6 @@ public interface CloudApiService {
     public boolean isLogged();
     public List<ReserveByApiDTO> getByIdCollection(Long collection_id);
     public List<DateSpaceApiDTO> getDateSpacesFilterByDates(DatesDTO dates);
+    public List<ReserveByApiDTO> getAllReserves();
+    public List<ReserveByApiDTO> reschedulerReserves(List<ReserveDateSpaceRequestDTO.ReserveID> reserves);
 }

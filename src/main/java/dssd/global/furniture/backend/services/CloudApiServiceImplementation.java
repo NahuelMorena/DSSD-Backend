@@ -341,4 +341,54 @@ public class CloudApiServiceImplementation implements CloudApiService {
         }
         return null;
     }
+
+    @Override
+    public List<ReserveByApiDTO> getAllReserves() {
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/getAllReserve")
+                .toUriString();
+
+        try {
+            ResponseEntity<ReserveByApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.GET, this.assembleHeader(null), ReserveByApiDTO[].class
+            );
+            ReserveByApiDTO[] response = responseEntity.getBody();
+            return Arrays.asList(response);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error 403, error de autenticacion JWT");
+        }
+    }
+
+    @Override
+    public List<ReserveByApiDTO> reschedulerReserves(List<ReserveDateSpaceRequestDTO.ReserveID> reserves) {
+        this.verifyToken();
+
+        String url = UriComponentsBuilder.fromHttpUrl(this.apiUrl)
+                .path("reserveMaterials/reschedulerReserves")
+                .toUriString();
+
+        try {
+            Map<String, List<ReserveDateSpaceRequestDTO.ReserveID>> requestBody =
+                    Collections.singletonMap("reserves", reserves);
+
+            String jsonBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            ResponseEntity<ReserveByApiDTO[]> responseEntity = this.getRestTemplate().exchange(
+                    url, HttpMethod.POST, this.assembleHeader(jsonBody), ReserveByApiDTO[].class
+            );
+
+            ReserveByApiDTO[] response = responseEntity.getBody();
+            return List.of(response);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            throw new RuntimeException("Error 403, error de autenticación JWT");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
